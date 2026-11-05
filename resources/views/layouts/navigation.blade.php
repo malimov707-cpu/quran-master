@@ -1,7 +1,37 @@
-@foreach ($navigation as $item)
-    <a href="{{ route($item['route']) }}"
-       @if (request()->routeIs($item['route'])) aria-current="page" @endif
-       class="block rounded-lg px-3 py-2 text-sm font-medium {{ request()->routeIs($item['route']) ? 'bg-forest text-gold' : 'text-cream/80 hover:bg-forest/50' }}">
-        {{ $item['label'] }}
-    </a>
+@php
+    $icons = [
+        'dashboard' => 'home', 'education.courses' => 'book', 'education.lessons' => 'book',
+        'education.groups' => 'users', 'education.schedules' => 'calendar', 'quran.surahs' => 'book',
+        'assignments.manage' => 'check', 'homework.index' => 'book', 'mentor.submissions' => 'check',
+        'parents.dashboard' => 'users', 'notifications.index' => 'bell',
+    ];
+    $groups = [
+        'Asosiy' => ['dashboard', 'quran.surahs'],
+        'Boshqaruv' => ['education.courses', 'education.lessons', 'education.groups', 'education.schedules'],
+        'O\'quv jarayoni' => ['assignments.manage', 'homework.index', 'mentor.submissions', 'parents.dashboard'],
+        'Tizim' => ['notifications.index'],
+    ];
+@endphp
+@foreach ($groups as $groupLabel => $routes)
+    @php $groupItems = array_filter($navigation, fn ($i) => in_array($i['route'], $routes, true)); @endphp
+    @if (count($groupItems) > 0)
+        <p class="nav-group-label">{{ __($groupLabel) }}</p>
+        @foreach ($groupItems as $item)
+            <a href="{{ route($item['route']) }}"
+               @if (request()->routeIs($item['route'])) aria-current="page" @endif
+               class="nav-link {{ request()->routeIs($item['route']) ? 'is-active' : '' }}" title="{{ __($item['label']) }}">
+                <x-icon :name="$icons[$item['route']] ?? 'grid'"/>
+                <span class="nav-label">{{ __($item['label']) }}</span>
+            </a>
+        @endforeach
+    @endif
 @endforeach
+
+@if (auth()->user()->hasRole('SUPER_ADMIN', 'CENTER_ADMIN'))
+    <p class="nav-group-label">{{ __('Markaz') }}</p>
+    @foreach (['users' => ['Foydalanuvchilar', 'users'], 'roles' => ['Rollar va ruxsatlar', 'check'], 'payments' => ['To‘lovlar', 'grid'], 'ai' => ['AI xizmatlari', 'chart'], 'audit' => ['Faoliyat jurnali', 'calendar'], 'settings' => ['Tizim sozlamalari', 'grid']] as $section => $item)
+        @if (($section === 'users' && auth()->user()->hasPermission('users.view')) || $section === 'payments' || auth()->user()->hasRole('SUPER_ADMIN'))
+            <a href="{{ route('administration', $section) }}" title="{{ __($item[0]) }}" @if (request()->route('section') === $section) aria-current="page" @endif class="nav-link {{ request()->route('section') === $section ? 'is-active' : '' }}"><x-icon :name="$item[1]"/><span class="nav-label">{{ __($item[0]) }}</span></a>
+        @endif
+    @endforeach
+@endif

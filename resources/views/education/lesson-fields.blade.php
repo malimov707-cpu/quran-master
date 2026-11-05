@@ -1,0 +1,9 @@
+<label class="block text-sm">{{ __('Dars nomi') }}<input name="title" required maxlength="255" value="{{ old('title', $editingLesson?->title) }}" class="mt-2 w-full rounded-lg border border-gray-200 p-3"></label>
+<label class="block text-sm">{{ __('O‘quv maqsadi') }}<textarea name="learning_objectives" rows="2" maxlength="5000" class="mt-2 w-full rounded-lg border border-gray-200 p-3">{{ old('learning_objectives', $editingLesson?->learning_objectives) }}</textarea></label>
+<label class="block text-sm">{{ __('Dars mazmuni') }}<textarea name="description" rows="8" maxlength="30000" class="mt-2 w-full rounded-lg border border-gray-200 p-3">{{ old('description', $editingLesson?->description) }}</textarea></label>
+<label class="block text-sm">{{ __('Mustaqil mashq') }}<textarea name="homework" rows="3" maxlength="10000" class="mt-2 w-full rounded-lg border border-gray-200 p-3">{{ old('homework', $editingLesson?->homework) }}</textarea></label>
+<div class="grid gap-4 sm:grid-cols-3">
+    <label class="block text-sm">{{ __('Davomiyligi (daqiqa)') }}<input name="duration_minutes" type="number" min="1" max="1440" value="{{ old('duration_minutes', $editingLesson?->duration_minutes ?? 30) }}" class="mt-2 w-full rounded-lg border border-gray-200 p-3"></label>
+    <label class="block text-sm">{{ __('Tartib raqami') }}<input name="sort_order" type="number" min="0" max="65535" required value="{{ old('sort_order', $editingLesson?->sort_order ?? 1) }}" class="mt-2 w-full rounded-lg border border-gray-200 p-3"></label>
+    <label class="block text-sm">{{ __('Holat') }}<select name="status" class="mt-2 w-full rounded-lg border border-gray-200 p-3">@foreach (['draft' => 'Qoralama', 'published' => 'E’lon qilingan', 'archived' => 'Arxiv'] as $value => $label)<option value="{{ $value }}" @selected(old('status', $editingLesson?->status ?? 'draft') === $value)>{{ __($label) }}</option>@endforeach</select></label>
+</div>

@@ -14,6 +14,7 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->web(append: [\App\Http\Middleware\SetInterfaceLocale::class]);
         $middleware->alias([
             'permission' => EnsureUserHasPermission::class,
         ]);

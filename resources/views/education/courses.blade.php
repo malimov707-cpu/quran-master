@@ -1,10 +1,10 @@
 @extends('layouts.app')
 
-@section('title', 'Kurslar')
+@section('title', __('Kurslar'))
 
 @section('content')
     <div class="flex items-center justify-between">
-        <h1 class="text-2xl font-bold text-emerald-deep">Kurslar</h1>
+        <h1 class="text-2xl font-bold text-emerald-deep">{{ __('Kurslar') }}</h1>
     </div>
 
     @if (session('status'))
@@ -21,6 +21,7 @@
                         {{ $course->status }}
                     </span>
                 </div>
+                @if ($canViewLessons)<a href="{{ route('education.lessons', ['course_id' => $course->id]) }}" class="mt-3 inline-block text-sm font-semibold text-forest">Darslar: {{ $course->lessons_count }} ta →</a>@endif
                 <p class="mt-2 line-clamp-2 text-sm text-graysoft">{{ $course->description }}</p>
                 <div class="mt-4 flex items-center justify-between text-xs text-graysoft">
                     <span>Daraja: {{ $course->level }}</span>
@@ -28,26 +29,27 @@
                 </div>
             </div>
         @empty
-            <p class="text-graysoft">Hozircha kurs yo'q.</p>
+            <p class="text-graysoft">{{ __('Hozircha kurs yo\'q.') }}</p>
         @endforelse
     </div>
 
     <div class="mt-8 rounded-2xl bg-ivory p-6 shadow-sm ring-1 ring-black/5">
-        <h3 class="font-semibold text-emerald-deep">Yangi kurs</h3>
+        <h3 class="font-semibold text-emerald-deep">{{ __('Yangi kurs') }}</h3>
         <form method="POST" action="{{ route('education.courses.store') }}" class="mt-4 grid gap-3 sm:grid-cols-4">
             @csrf
-            <input name="name" required placeholder="Kurs nomi"
+            <input aria-label="{{ __('Kurs nomi') }}" name="name" required placeholder="{{ __('Kurs nomi') }}"
                    class="rounded-lg border border-gray-200 px-3 py-2 sm:col-span-2">
-            <select name="level" required class="rounded-lg border border-gray-200 px-3 py-2">
-                <option value="beginner">Boshlang'ich</option>
-                <option value="intermediate">O'rta</option>
-                <option value="advanced">Yuqori</option>
+            <select aria-label="{{ __('Daraja') }}" name="level" required class="rounded-lg border border-gray-200 px-3 py-2">
+                <option value="beginner">{{ __('Boshlang\'ich') }}</option>
+                <option value="intermediate">{{ __('O\'rta') }}</option>
+                <option value="advanced">{{ __('Yuqori') }}</option>
             </select>
-            <input name="duration_weeks" type="number" min="1" placeholder="Hafta"
+            <input aria-label="{{ __('Davomiylik (hafta)') }}" name="duration_weeks" type="number" min="1" placeholder="{{ __('Hafta') }}"
                    class="rounded-lg border border-gray-200 px-3 py-2">
             <button class="rounded-lg bg-emerald-deep px-4 py-2 font-semibold text-cream hover:bg-forest sm:col-span-4">
-                Qo'shish
+                {{ __('Qo‘shish') }}
             </button>
         </form>
     </div>
+<div class="mt-6">{{ $courses->links() }}</div>
 @endsection

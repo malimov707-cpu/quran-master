@@ -1,18 +1,18 @@
 @extends('layouts.app')
 
-@section('title', 'Tekshiruv')
+@section('title', __('Tekshiruv'))
 
 @section('content')
-    <h1 class="text-2xl font-bold text-emerald-deep">Kutayotgan topshirishlar</h1>
+    <h1 class="text-2xl font-bold text-emerald-deep">{{ __('Kutayotgan topshirishlar') }}</h1>
 
-    <div class="mt-6 overflow-hidden rounded-2xl bg-ivory shadow-sm ring-1 ring-black/5">
+    <div class="mt-6 overflow-x-auto rounded-2xl bg-ivory shadow-sm ring-1 ring-black/5">
         <table class="w-full text-sm">
             <thead class="bg-cream text-left text-xs uppercase text-graysoft">
                 <tr>
-                    <th class="px-4 py-3">O'quvchi</th>
-                    <th class="px-4 py-3">Topshiriq</th>
-                    <th class="px-4 py-3">Holat</th>
-                    <th class="px-4 py-3">Sana</th>
+                    <th class="px-4 py-3">{{ __('O\'quvchi') }}</th>
+                    <th class="px-4 py-3">{{ __('Topshiriq') }}</th>
+                    <th class="px-4 py-3">{{ __('Holat') }}</th>
+                    <th class="px-4 py-3">{{ __('Sana') }}</th>
                     <th class="px-4 py-3"></th>
                 </tr>
             </thead>
@@ -26,11 +26,11 @@
                         </td>
                         <td class="px-4 py-3 text-graysoft">{{ $s->submitted_at->format('d.m.Y H:i') }}</td>
                         <td class="px-4 py-3">
-                            <a href="{{ route('mentor.review-studio', $s) }}" class="font-medium text-emerald-deep hover:underline">Tekshirish →</a>
+                            <a href="{{ route('mentor.review-studio', $s) }}" class="font-medium text-emerald-deep hover:underline">{{ __('Tekshirish →') }}</a>
                         </td>
                     </tr>
                 @empty
-                    <tr><td colspan="5" class="px-4 py-6 text-center text-graysoft">Yangi topshirish yo'q ✓</td></tr>
+                    <tr><td colspan="5" class="px-4 py-6 text-center text-graysoft">{{ __('Yangi topshirish yo\'q ✓') }}</td></tr>
                 @endforelse
             </tbody>
         </table>

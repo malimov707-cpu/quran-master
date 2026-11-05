@@ -99,7 +99,11 @@ class DatabaseSeeder extends Seeder
         $allPermissions = Permission::all();
         $roles['SUPER_ADMIN']->permissions()->sync($allPermissions->pluck('id'));
 
-        // Super admin foydalanuvchi
+        // Super admin foydalanuvchi — production'da seed TAQIQLANGAN (AppServiceProvider'da tekshiriladi)
+        if (app()->environment('production')) {
+            throw new \RuntimeException('Seeder production muhitida ishga tushirilmaydi — demo akkauntlar xavfsizlik xavfi.');
+        }
+
         $admin = User::create([
             'name' => 'Super Admin',
             'email' => 'admin@quronai.uz',

@@ -10,8 +10,9 @@ export default defineConfig({
             refresh: true,
             fonts: [
                 bunny('Instrument Sans', {
-                    weights: [400, 500, 600],
+                    weights: [400, 500, 600, 700],
                 }),
+                bunny('Amiri', { weights: [400, 700], subsets: ['arabic', 'latin'] }),
             ],
         }),
         tailwindcss(),

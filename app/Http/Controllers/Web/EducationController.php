@@ -19,11 +19,13 @@ class EducationController extends BaseController
 {
     public function __construct(private CourseService $courses) {}
 
-    public function coursesIndex(): View
+    public function coursesIndex(Request $request): View
     {
-        $courses = Course::with('headTeacher:id,name')->withCount('groups')->orderByDesc('created_at')->paginate(12);
+        $courses = Course::with('headTeacher:id,name')->withCount(['groups', 'lessons'])->orderByDesc('created_at')->paginate(12);
 
-        return view('education.courses', compact('courses'));
+        $canViewLessons = $request->user()->hasPermission('lessons.view');
+
+        return view('education.courses', compact('courses', 'canViewLessons'));
     }
 
     public function coursesStore(Request $request): RedirectResponse

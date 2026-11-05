@@ -16,7 +16,8 @@ class LessonController extends Controller
         abort_unless($request->user()?->hasPermission('lessons.view'), 403);
 
         $lessons = Lesson::query()
-            ->with('materials')
+            ->with(['materials', 'course:id,name'])
+            ->when(! $request->user()->hasPermission('lessons.create'), fn ($query) => $query->where('status', 'published'))
             ->when($request->filled('course_id'), fn ($query) => $query->where('course_id', $request->integer('course_id')))
             ->when($request->filled('status'), fn ($query) => $query->where('status', $request->string('status')))
             ->orderBy('sort_order')
@@ -28,6 +29,8 @@ class LessonController extends Controller
     public function show(Request $request, Lesson $lesson): JsonResource
     {
         abort_unless($request->user()?->hasPermission('lessons.view'), 403);
+
+        abort_unless($lesson->status === 'published' || $request->user()->hasPermission('lessons.update'), 404);
 
         return new JsonResource($lesson->load(['course:id,name', 'materials']));
     }

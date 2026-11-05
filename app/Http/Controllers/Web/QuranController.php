@@ -5,12 +5,21 @@ namespace App\Http\Controllers\Web;
 use App\Http\Controllers\Controller as BaseController;
 use App\Models\Quran\Surah;
 use Illuminate\View\View;
+use Illuminate\Http\Request;
 
 class QuranController extends BaseController
 {
-    public function surahsIndex(): View
+    public function surahsIndex(Request $request): View
     {
-        $surahs = Surah::orderBy('number')->get();
+        $filters = $request->validate(['q' => ['nullable', 'string', 'max:100']]);
+        $search = trim($filters['q'] ?? '');
+        $surahs = Surah::query()->when($search !== '', fn ($query) => $query->where(function ($query) use ($search): void {
+            $query->where('name_uz', 'like', '%'.$search.'%')->orWhere('name_en', 'like', '%'.$search.'%')
+                ->orWhere('name_arabic', 'like', '%'.$search.'%');
+            if (ctype_digit($search)) {
+                $query->orWhere('number', (int) $search);
+            }
+        }))->orderBy('number')->get();
 
         return view('quran.surahs', compact('surahs'));
     }

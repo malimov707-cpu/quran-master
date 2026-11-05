@@ -47,10 +47,15 @@ class ProgressService
         // Haftalik progress (oxirgi 4 hafta baholangan topshirishlar)
         $weekly = (clone $graded)
             ->where('submissions.submitted_at', '>=', now()->subWeeks(4))
-            ->selectRaw('strftime("%Y-W%W", submissions.submitted_at) as week, avg(submissions.final_score) as avg_score, count(*) as count')
-            ->groupBy('week')
-            ->orderBy('week')
-            ->get();
+            ->get(['submissions.final_score', 'submissions.submitted_at'])
+            ->groupBy(fn ($r) => $r->submitted_at->format('o-\WW'))
+            ->map(fn ($rows, $week) => (object) [
+                'week' => $week,
+                'avg_score' => round($rows->avg('final_score'), 1),
+                'count' => $rows->count(),
+            ])
+            ->sortKeys()
+            ->values();
 
         return [
             'submissions_total' => Submission::where('student_id', $student->id)->count(),

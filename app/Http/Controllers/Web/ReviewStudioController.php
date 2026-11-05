@@ -15,7 +15,7 @@ class ReviewStudioController extends BaseController
     {
         abort_unless(auth()->user()->hasPermission('submissions.review'), 403);
 
-        $submission->load(['assignment', 'student', 'files', 'reviews.mentor', 'reviews.segments']);
+        $submission->load(['assignment', 'student', 'files', 'reviews.mentor', 'reviews.segments', 'aiReviews.segments']);
 
         $audioUrls = $submission->files->map(fn ($f) => [
             'name' => $f->original_name,
@@ -26,6 +26,8 @@ class ReviewStudioController extends BaseController
         return view('mentor.review-studio', [
             'submission' => $submission,
             'audioUrls' => $audioUrls,
+            'comparisonAyahs' => \App\Models\Quran\Ayah::whereHas('surah', fn ($query) => $query->where('number', $submission->assignment->surah_number))
+                ->whereBetween('number_in_surah', [$submission->assignment->ayah_from ?? 1, $submission->assignment->ayah_to ?? 1])->get(),
         ]);
     }
 

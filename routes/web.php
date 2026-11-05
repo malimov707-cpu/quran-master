@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\V1\AssignmentController;
 use App\Http\Controllers\Web\AssignmentManagementController;
 use App\Http\Controllers\Web\EducationController;
 use App\Http\Controllers\Web\HomeworkController;
+use App\Http\Controllers\Web\LessonWebController;
 use App\Http\Controllers\Web\MentorReviewWebController;
 use App\Http\Controllers\Web\NotificationWebController;
 use App\Http\Controllers\Web\ParentDashboardController;
@@ -13,6 +14,8 @@ use App\Http\Controllers\Web\ScheduleController;
 use App\Http\Controllers\Web\WebAuthController as WebAuth;
 use Illuminate\Support\Facades\Route;
 
+Route::post('/interface-locale', \App\Http\Controllers\Web\LocaleController::class)->name('interface.locale');
+
 Route::get('/', fn () => redirect()->route('dashboard'));
 
 Route::middleware('guest')->group(function (): void {
@@ -21,7 +24,13 @@ Route::middleware('guest')->group(function (): void {
 });
 
 Route::middleware('auth')->group(function (): void {
+    Route::get('/administration/{section}', [\App\Http\Controllers\Web\AdministrationController::class, 'index'])->name('administration');
     Route::get('/dashboard', [WebAuth::class, 'dashboard'])->name('dashboard');
+    Route::get('/lessons', [LessonWebController::class, 'index'])->name('education.lessons');
+    Route::post('/lessons', [LessonWebController::class, 'store'])->name('education.lessons.store');
+    Route::get('/lessons/{lesson}', [LessonWebController::class, 'show'])->name('education.lessons.show');
+    Route::patch('/lessons/{lesson}', [LessonWebController::class, 'update'])->name('education.lessons.update');
+
     Route::get('/schedules', [ScheduleController::class, 'index'])->name('education.schedules');
     Route::post('/schedules', [ScheduleController::class, 'store'])->name('education.schedules.store');
     Route::get('/schedules/{schedule}/attendance', [ScheduleController::class, 'attendance'])->name('education.attendance');

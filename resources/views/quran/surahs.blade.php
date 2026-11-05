@@ -1,10 +1,13 @@
 @extends('layouts.app')
 
-@section('title', 'Qur\'on')
+@section('title', __('Qur\'on'))
 
 @section('content')
-    <h1 class="text-2xl font-bold text-emerald-deep">Qur'on — Suralar</h1>
+    <h1 class="text-2xl font-bold text-emerald-deep">{{ __('Qur\'on — Suralar') }}</h1>
 
+    <p class="mt-2 text-sm text-graysoft">{{ __('Ishonchli matn. Qulay o‘qish. Har kuni yangi qadam.') }}</p>
+    <form method="GET" class="mt-5 flex gap-3"><label class="min-w-0 flex-1"><span class="sr-only">{{ __('Sura nomi yoki raqami') }}</span><input name="q" value="{{ request('q') }}" placeholder="{{ __('Sura nomi yoki raqami') }}" class="w-full"></label><button type="submit" class="rounded-xl bg-forest px-5 text-white">{{ __('Qidirish') }}</button></form>
+    @if ($surahs->isEmpty())<div class="glass-panel mt-6 p-8 text-center"><p>{{ __('Sura topilmadi.') }}</p><a href="{{ route('quran.surahs') }}" class="mt-3 inline-block text-sm text-forest">{{ __('Barcha suralar →') }}</a></div>@endif
     <div class="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         @foreach ($surahs as $s)
             <a href="{{ route('quran.surah', $s) }}"
@@ -16,8 +19,9 @@
                         <p class="text-xs text-graysoft">{{ $s->ayah_count }} oyat · {{ $s->revelation_type === 'meccan' ? 'Makka' : 'Madina' }}</p>
                     </div>
                 </div>
-                <span class="ayah-text text-2xl">{{ $s->name_arabic }}</span>
+                <span lang="ar" dir="rtl" class="ayah-text text-2xl">{{ $s->name_arabic }}</span>
             </a>
         @endforeach
     </div>
+    @include('quran.source-notice')
 @endsection

@@ -1,17 +1,17 @@
 @extends('layouts.app')
 
-@section('title', 'Bildirishnomalar')
+@section('title', __('Bildirishnomalar'))
 
 @section('content')
     <div class="mb-6 flex flex-wrap items-center justify-between gap-4">
         <div>
-            <h1 class="text-2xl font-bold text-emerald-deep">Bildirishnomalar</h1>
-            <p class="mt-1 text-sm text-graysoft">{{ $unreadCount }} ta o‘qilmagan xabar</p>
+            <h1 class="text-2xl font-bold text-emerald-deep">{{ __('Bildirishnomalar') }}</h1>
+            <p class="mt-1 text-sm text-graysoft">{{ __(':count ta o‘qilmagan xabar', ['count' => $unreadCount]) }}</p>
         </div>
         @if ($unreadCount > 0)
             <form method="POST" action="{{ route('notifications.read-all') }}">
                 @csrf
-                <button type="submit" class="rounded-lg bg-emerald-deep px-4 py-2 text-sm font-semibold text-cream">Hammasini o‘qilgan qilish</button>
+                <button type="submit" class="rounded-lg bg-emerald-deep px-4 py-2 text-sm font-semibold text-cream">{{ __('Hammasini o‘qilgan qilish') }}</button>
             </form>
         @endif
     </div>
@@ -29,13 +29,13 @@
                     @if (! $notification->read_at)
                         <form method="POST" action="{{ route('notifications.read', $notification->id) }}">
                             @csrf
-                            <button type="submit" class="rounded-lg border border-emerald-deep px-3 py-2 text-sm text-emerald-deep">O‘qilgan qilish</button>
+                            <button type="submit" class="rounded-lg border border-emerald-deep px-3 py-2 text-sm text-emerald-deep">{{ __('O‘qilgan qilish') }}</button>
                         </form>
                     @endif
                 </div>
             </article>
         @empty
-            <p class="rounded-2xl bg-ivory p-6 text-graysoft">Hozircha bildirishnoma yo‘q.</p>
+            <p class="rounded-2xl bg-ivory p-6 text-graysoft">{{ __('Hozircha bildirishnoma yo‘q.') }}</p>
         @endforelse
     </div>
     <div class="mt-6">{{ $notifications->links() }}</div>
