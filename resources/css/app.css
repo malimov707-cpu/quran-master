@@ -1,0 +1,37 @@
+@import 'tailwindcss';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+
+@theme {
+    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+        'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-arabic: 'Amiri Quran', 'Scheherazade New', 'Traditional Arabic', serif;
+
+    /* Qur'on AI Ustoz dizayn tizimi */
+    --color-emerald-deep: #0b3d2e;
+    --color-forest: #14532d;
+    --color-cream: #faf6ef;
+    --color-ivory: #fffdf7;
+    --color-gold: #c9a227;
+    --color-graysoft: #6b7280;
+}
+
+body {
+    @apply bg-cream text-gray-900 antialiased;
+}
+
+/* Arabcha oyatlar — o'qishga qulay, interfeys matnidan aniq ajraladi */
+.ayah-text {
+    font-family: var(--font-arabic);
+    direction: rtl;
+    font-size: 1.75rem;
+    line-height: 2.4;
+    @apply text-emerald-deep;
+}
+
+.islamic-pattern {
+    background-image: radial-gradient(circle at 25% 25%, rgba(201, 162, 39, 0.08) 2px, transparent 2px),
+        radial-gradient(circle at 75% 75%, rgba(11, 61, 46, 0.06) 2px, transparent 2px);
+    background-size: 28px 28px;
+}
