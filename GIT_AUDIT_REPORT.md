@@ -12,6 +12,7 @@
 - PASS: No private key, signing certificate, populated `.env`, API token, or provider credential was detected in tracked changes.
 - PASS: `.env.example` contains empty placeholders only.
 - PASS: `.env` files are ignored by repository rules.
+- PASS: `.env.*` local variants are ignored, with only documented `.env` example files allowlisted.
 - PASS: mobile signing key patterns are ignored by the mobile repository.
 
 ## Build Artifacts
