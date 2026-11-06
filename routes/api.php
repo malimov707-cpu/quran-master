@@ -85,6 +85,9 @@ Route::prefix('v1')->group(function (): void {
 
         // AI natijalari
         Route::get('submissions/{submission}/ai-review', [AiController::class, 'show']);
+        Route::get('ai/capabilities', [AiController::class, 'capabilities']);
+        Route::post('ai/chat', [AiController::class, 'chat'])->middleware('throttle:20,1');
+        Route::patch('ai/users/{user}/premium', [AiController::class, 'setPremium']);
 
         // Progress, notifications, parents
         Route::get('progress/me', [ProgressController::class, 'my']);

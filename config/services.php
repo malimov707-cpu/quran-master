@@ -41,6 +41,12 @@ return [
         'whisper_model' => env('WHISPER_MODEL', 'whisper-1'),
     ],
 
+    'openrouter' => [
+        'key' => env('OPENROUTER_API_KEY'),
+        'model' => env('OPENROUTER_MODEL', 'nvidia/nemotron-3.5-super-vl:free'),
+        'base_url' => env('OPENROUTER_BASE_URL', 'https://openrouter.ai/api/v1'),
+    ],
+
     'fcm' => [
         'server_key' => env('FCM_SERVER_KEY'),
         'endpoint' => env('FCM_ENDPOINT', 'https://fcm.googleapis.com/fcm/send'),

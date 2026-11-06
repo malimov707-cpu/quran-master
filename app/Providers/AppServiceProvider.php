@@ -2,8 +2,10 @@
 
 namespace App\Providers;
 
+use App\Services\AI\Contracts\AIExplanationProvider;
 use App\Services\AI\Contracts\SpeechRecognitionProvider;
 use App\Services\AI\Contracts\TajweedAnalysisProvider;
+use App\Services\AI\Providers\OpenRouterExplanationProvider;
 use App\Services\AI\Providers\UnavailableTajweedProvider;
 use App\Services\AI\Providers\WhisperSpeechProvider;
 use Illuminate\Support\Facades\View as ViewFacade;
@@ -19,6 +21,7 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->app->bind(SpeechRecognitionProvider::class, WhisperSpeechProvider::class);
         $this->app->bind(TajweedAnalysisProvider::class, UnavailableTajweedProvider::class);
+        $this->app->bind(AIExplanationProvider::class, OpenRouterExplanationProvider::class);
     }
 
     public function boot(): void

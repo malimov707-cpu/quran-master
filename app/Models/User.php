@@ -13,7 +13,7 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Collection;
 use Laravel\Sanctum\HasApiTokens;
 
-#[Fillable(['name', 'email', 'password', 'phone', 'locale', 'is_active'])]
+#[Fillable(['name', 'email', 'password', 'phone', 'locale', 'is_active', 'ai_premium'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -31,6 +31,7 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'is_active' => 'boolean',
+            'ai_premium' => 'boolean',
             'last_login_at' => 'datetime',
         ];
     }
@@ -53,6 +54,11 @@ class User extends Authenticatable
     public function notificationPreferences(): HasMany
     {
         return $this->hasMany(NotificationPreference::class);
+    }
+
+    public function studentProgress(): HasMany
+    {
+        return $this->hasMany(StudentProgress::class, 'student_id');
     }
 
     /**
