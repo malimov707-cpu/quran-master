@@ -4,6 +4,7 @@ namespace App\Services\AI\Providers;
 
 use App\Models\AiUsageLog;
 use App\Services\AI\Contracts\AIExplanationProvider;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use RuntimeException;
@@ -31,17 +32,23 @@ class OpenRouterExplanationProvider implements AIExplanationProvider
             return null;
         }
 
+        $cacheKey = 'ai:openrouter:'.hash('sha256', $this->model().'|'.$question.'|'.implode('|', $allowedContexts));
+        $cached = Cache::get($cacheKey);
+        if (is_string($cached) && trim($cached) !== '') {
+            return trim($cached);
+        }
+
         $started = microtime(true);
-        $context = $allowedContexts === [] ? '' : "\n\nMa'qullangan o'quv konteksti:\n".implode("\n", $allowedContexts);
+        $context = $allowedContexts === [] ? '' : "\nKontekst: ".implode('; ', array_slice($allowedContexts, 0, 3));
 
         try {
             $response = Http::withToken((string) config('services.openrouter.key'))
                 ->acceptJson()
                 ->timeout((int) config('ai.timeout_seconds', 60))
-                ->retry([500, 1500, 3000], 2, throw: false)
                 ->post(rtrim((string) config('services.openrouter.base_url'), '/').'/chat/completions', [
                     'model' => $this->model(),
                     'temperature' => 0.2,
+                    'max_tokens' => 400,
                     'messages' => [
                         ['role' => 'system', 'content' => $this->systemPrompt().$context],
                         ['role' => 'user', 'content' => $question],
@@ -63,15 +70,28 @@ class OpenRouterExplanationProvider implements AIExplanationProvider
             throw new RuntimeException('AI provider xatosi: '.$response->status());
         }
 
-        return trim((string) data_get($response->json(), 'choices.0.message.content', '')) ?: null;
+        $content = trim((string) data_get($response->json(), 'choices.0.message.content', ''));
+        if ($content === '') {
+            $content = trim((string) data_get($response->json(), 'choices.0.message.reasoning', ''));
+        }
+
+        if ($content === '') {
+            return null;
+        }
+
+        if (strlen($content) > 900) {
+            $content = mb_substr($content, 0, 900)."\u{2026}";
+        }
+
+        Cache::put($cacheKey, $content, now()->addHours(24));
+
+        return $content;
     }
 
     private function systemPrompt(): string
     {
         return <<<'PROMPT'
-    Siz Qur'on AI Ustoz platformasining yordamchisiz. Yaxshilik, ilmi asoslovchi manbalar, o'quvchi xavfsizligi va ustoz nazoratini birinchi o'ringa qo'ying.
-    Faqat ishonchli dars kontekstini ishlating. Qur'on yoki tajvidga oid fikrni ishonchli dalil bilan ajrating.
-    Fiqh, fatvo yoki diniy e'tiqod savollarida qat'iy hukm chiqarmang va malakali ustozga yo'naltiring.
+    Siz Qur'on AI Ustoz yordamchisiz. 1-3 qisqa gapda, aniq va ishonchli javob bering. Qur'on/tajvid materialiga asosan javob bering; fatvo yoki qat'iy diniy hukm chiqarmang, ustozga yo'naltiring.
     PROMPT;
     }
 
