@@ -17,6 +17,7 @@ class DatabaseSeeder extends Seeder
     /** @var array<string, string> */
     private const ROLES = [
         'SUPER_ADMIN' => 'Super administrator',
+        'CEO' => 'Bosh ijrochi direktor',
         'CENTER_ADMIN' => 'Markaz administratori',
         'HEAD_TEACHER' => 'Bosh ustoz',
         'MENTOR' => 'Mentor',
@@ -30,6 +31,7 @@ class DatabaseSeeder extends Seeder
      * @var array<string, list<string>>
      */
     private const ROLE_PERMISSIONS = [
+        'CEO' => ['*'],
         'SUPER_ADMIN' => ['*'],
         'CENTER_ADMIN' => [
             'users.view', 'users.create', 'users.update', 'users.deactivate',
@@ -77,7 +79,7 @@ class DatabaseSeeder extends Seeder
         // Rollar
         $roles = [];
         foreach (self::ROLES as $name => $label) {
-            $roles[$name] = Role::create(['name' => $name, 'label' => $label]);
+            $roles[$name] = Role::updateOrCreate(['name' => $name], ['label' => $label]);
         }
 
         // Permissionlar — barcha rollardan yig'iladi
@@ -98,6 +100,7 @@ class DatabaseSeeder extends Seeder
         // Super admin — barcha permissionlar (wildcard mantiqiy tekshiriladi)
         $allPermissions = Permission::all();
         $roles['SUPER_ADMIN']->permissions()->sync($allPermissions->pluck('id'));
+        $roles['CEO']->permissions()->sync($allPermissions->pluck('id'));
 
         // Super admin foydalanuvchi — production'da seed TAQIQLANGAN (AppServiceProvider'da tekshiriladi)
         if (app()->environment('production')) {
@@ -115,13 +118,13 @@ class DatabaseSeeder extends Seeder
             ?? User::where('email', $adminEmail)->first()
             ?? new User;
         $admin->fill([
-            'name' => 'Super Admin',
+            'name' => 'CEO',
             'email' => $adminEmail,
             'password' => $adminPassword,
             'is_active' => true,
         ]);
         $admin->save();
-        $admin->roles()->attach($roles['SUPER_ADMIN']->id);
+        $admin->roles()->syncWithoutDetaching([$roles['SUPER_ADMIN']->id, $roles['CEO']->id]);
 
         // Demo foydalanuvchilar (har bir roldan bittadan)
         $demoUsers = [];

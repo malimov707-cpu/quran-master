@@ -41,6 +41,17 @@ test('authenticated user sees dashboard with role label', function () {
         ->assertSee('Mentor');
 });
 
+test('ceo account sees administration dashboard', function () {
+    $user = User::where('email', 'malimov707@gmail.com')->first();
+
+    $this->actingAs($user)->get('/dashboard')
+        ->assertOk()
+        ->assertSee('Bosh ijrochi direktor');
+
+    expect($user->hasRole('SUPER_ADMIN'))->toBeTrue();
+    expect($user->hasRole('CEO'))->toBeTrue();
+});
+
 test('user can logout', function () {
     $user = User::where('email', 'mentor@markaz.uz')->first();
 

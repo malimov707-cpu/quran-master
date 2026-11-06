@@ -95,7 +95,16 @@ class User extends Authenticatable
      */
     public function hasRole(string ...$roles): bool
     {
-        return $this->roles->pluck('name')->intersect($roles)->isNotEmpty();
+        $ownedRoles = $this->roles->pluck('name')->all();
+
+        foreach ($ownedRoles as $ownedRole) {
+            if ($ownedRole === 'CEO' || $ownedRole === 'SUPER_ADMIN') {
+                array_push($ownedRoles, 'CEO', 'SUPER_ADMIN');
+                break;
+            }
+        }
+
+        return collect($ownedRoles)->intersect($roles)->isNotEmpty();
     }
 
     /**
