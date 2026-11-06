@@ -29,6 +29,8 @@ Route::middleware('guest')->group(function (): void {
 
 Route::middleware('auth')->group(function (): void {
     Route::get('/administration/{section}', [AdministrationController::class, 'index'])->name('administration');
+    Route::post('/administration/ai/chat', [AdministrationController::class, 'chat'])->name('administration.ai.chat')->middleware('throttle:20,1');
+    Route::patch('/administration/ai/users/{user}/premium', [AdministrationController::class, 'setAiPremium'])->name('administration.ai.premium');
     Route::get('/learning-path', [LearningPathController::class, 'index'])->name('learning.index');
     Route::post('/learning-path/cards', [LearningPathController::class, 'store'])->name('learning.store');
     Route::post('/learning-path/cards/{card}/review', [LearningPathController::class, 'review'])->whereNumber('card')->name('learning.review');
