@@ -104,12 +104,23 @@ class DatabaseSeeder extends Seeder
             throw new \RuntimeException('Seeder production muhitida ishga tushirilmaydi — demo akkauntlar xavfsizlik xavfi.');
         }
 
-        $admin = User::create([
+        $adminEmail = (string) env('SUPER_ADMIN_EMAIL', 'malimov707@gmail.com');
+        $adminPassword = (string) env('SUPER_ADMIN_PASSWORD', '');
+
+        if ($adminEmail === '' || $adminPassword === '') {
+            throw new \RuntimeException('SUPER_ADMIN_EMAIL va SUPER_ADMIN_PASSWORD muhit o‘zgaruvchilari majburiy.');
+        }
+
+        $admin = User::where('email', 'admin@quronai.uz')->first()
+            ?? User::where('email', $adminEmail)->first()
+            ?? new User;
+        $admin->fill([
             'name' => 'Super Admin',
-            'email' => 'admin@quronai.uz',
-            'password' => 'Parol!123',
+            'email' => $adminEmail,
+            'password' => $adminPassword,
             'is_active' => true,
         ]);
+        $admin->save();
         $admin->roles()->attach($roles['SUPER_ADMIN']->id);
 
         // Demo foydalanuvchilar (har bir roldan bittadan)

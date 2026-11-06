@@ -14,14 +14,14 @@ test('administration screens require an administrator and protect system informa
     $this->actingAs($student)->get(route('administration', 'users'))->assertForbidden();
     $centerAdmin = User::where('email', 'admin@markaz.uz')->firstOrFail();
     $this->actingAs($centerAdmin)->get(route('administration', 'audit'))->assertForbidden();
-    $admin = User::where('email', 'admin@quronai.uz')->firstOrFail();
+    $admin = User::where('email', 'malimov707@gmail.com')->firstOrFail();
     $this->actingAs($admin)->get(route('administration', 'roles'))->assertOk()->assertSee('Rollar va ruxsatlar');
     $this->get(route('administration', 'missing'))->assertNotFound();
 });
 
 test('admin user search applies both search and role filters and escapes names', function () {
     $this->seed(DatabaseSeeder::class);
-    $admin = User::where('email', 'admin@quronai.uz')->firstOrFail();
+    $admin = User::where('email', 'malimov707@gmail.com')->firstOrFail();
     $member = User::factory()->create(['name' => '<script>Member</script>']);
     $member->roles()->attach(Role::where('name', 'STUDENT')->firstOrFail());
     $response = $this->actingAs($admin)->get(route('administration', ['section' => 'users', 'q' => 'Member', 'role' => 'STUDENT']))

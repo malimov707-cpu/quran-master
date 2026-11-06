@@ -27,7 +27,7 @@ test('learning path requires student permission and enrolment does not change ca
     $ayah = learningPathAyah();
     $original = $ayah->text_arabic;
     $this->getJson('/api/v1/learning-path')->assertUnauthorized();
-    $admin = User::where('email', 'admin@quronai.uz')->firstOrFail();
+    $admin = User::where('email', 'malimov707@gmail.com')->firstOrFail();
     $this->actingAs($admin)->getJson('/api/v1/learning-path')->assertForbidden();
     $student = User::where('email', 'oquvchi@markaz.uz')->firstOrFail();
     $first = $this->actingAs($student)->postJson('/api/v1/learning-path/cards', ['ayah_id' => $ayah->id])->assertCreated()->assertJsonPath('card.version', 0);

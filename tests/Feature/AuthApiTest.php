@@ -22,6 +22,18 @@ test('login valid credentials returns token and roles', function () {
     expect($response->json('user.roles'))->toContain('MENTOR');
 });
 
+test('super admin login uses configured credentials', function () {
+    config()->set('super_admin.email', 'malimov707@gmail.com');
+
+    $response = $this->postJson('/api/v1/auth/login', [
+        'email' => 'malimov707@gmail.com',
+        'password' => 'mashhurbek707',
+    ]);
+
+    $response->assertOk()
+        ->assertJsonPath('user.email', 'malimov707@gmail.com');
+});
+
 test('login invalid credentials fails', function () {
     $this->postJson('/api/v1/auth/login', [
         'email' => 'mentor@markaz.uz',
@@ -30,13 +42,13 @@ test('login invalid credentials fails', function () {
 });
 
 test('me returns authenticated user with permissions', function () {
-    $user = User::where('email', 'admin@quronai.uz')->first();
+    $user = User::where('email', 'malimov707@gmail.com')->first();
 
     $token = $user->createToken('test')->plainTextToken;
 
     $this->withToken($token)->getJson('/api/v1/auth/me')
         ->assertOk()
-        ->assertJsonPath('email', 'admin@quronai.uz')
+        ->assertJsonPath('email', 'malimov707@gmail.com')
         ->assertJsonPath('roles.0', 'SUPER_ADMIN');
 });
 
@@ -45,7 +57,7 @@ test('me requires authentication', function () {
 });
 
 test('logout revokes current token', function () {
-    $user = User::where('email', 'admin@quronai.uz')->first();
+    $user = User::where('email', 'malimov707@gmail.com')->first();
     $token = $user->createToken('test')->plainTextToken;
 
     $this->withToken($token)->postJson('/api/v1/auth/logout')->assertOk();

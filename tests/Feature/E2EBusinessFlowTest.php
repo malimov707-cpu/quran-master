@@ -77,7 +77,7 @@ function runPipeline(int $submissionId, SpeechRecognitionProvider $speech): void
 
 test('FULL E2E: admin→rahbar→mentor→oquvchi→audio→AI→review→parent→rahbar', function () {
     // ===== 1. ADMIN: o'quvchi yaratadi =====
-    token('admin@quronai.uz');
+    token('malimov707@gmail.com');
     $student = User::create(['name' => 'E2E Oquvchi', 'email' => 'e2e-student@test.uz', 'password' => 'Parol!123']);
     $student->roles()->attach(Role::where('name', 'STUDENT')->firstOrFail()->id);
     $studentId = $student->id;

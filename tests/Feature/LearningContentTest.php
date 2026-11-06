@@ -51,7 +51,7 @@ test('head teacher can create and update lesson content', function () {
 
 test('super admin navigation and dashboard exclude personal student mentor and parent controls', function () {
     $this->seed(DatabaseSeeder::class);
-    $admin = User::where('email', 'admin@quronai.uz')->firstOrFail();
+    $admin = User::where('email', 'malimov707@gmail.com')->firstOrFail();
 
     $this->actingAs($admin)->get(route('dashboard'))->assertOk()
         ->assertSee(route('education.lessons'))->assertSee(route('assignments.manage'))
