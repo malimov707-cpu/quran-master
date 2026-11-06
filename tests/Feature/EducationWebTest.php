@@ -73,3 +73,14 @@ test('admin can add student to group via web form', function () {
 test('guest cannot access courses page', function () {
     $this->get(route('education.courses'))->assertRedirect('/login');
 });
+
+test('student cannot use education management endpoints or see course creation controls', function () {
+    $student = User::where('email', 'oquvchi@markaz.uz')->firstOrFail();
+    $this->actingAs($student)->get(route('education.courses'))->assertOk()->assertDontSee('Yangi kurs');
+    $this->get(route('education.groups'))->assertForbidden();
+    $this->post(route('education.courses.store'), ['name' => 'Unauthorized', 'level' => 'beginner'])->assertForbidden();
+    $this->post(route('education.groups.store'), ['name' => 'Unauthorized', 'course_id' => Course::firstOrFail()->id, 'capacity' => 10])->assertForbidden();
+    $this->post(route('education.groups.add-student.select'), ['group_id' => Group::firstOrFail()->id, 'student_id' => $student->id])->assertForbidden();
+    expect(Course::where('name', 'Unauthorized')->exists())->toBeFalse();
+    expect(Group::where('name', 'Unauthorized')->exists())->toBeFalse();
+});

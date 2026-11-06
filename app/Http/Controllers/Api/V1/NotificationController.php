@@ -56,4 +56,28 @@ class NotificationController extends Controller
 
         return response()->json(['message' => 'Hammasi o\'qilgan.']);
     }
+
+    public function registerDevice(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'token' => ['required', 'string', 'min:20', 'max:512'],
+            'platform' => ['required', 'in:android,ios,web'],
+            'device_id' => ['nullable', 'string', 'max:128'],
+        ]);
+
+        $device = $request->user()->pushDevices()->updateOrCreate(
+            ['token' => $validated['token']],
+            [...$validated, 'last_seen_at' => now()],
+        );
+
+        return response()->json(['device' => $device, 'message' => 'Push qurilma ro\'yxatga olindi.'], 201);
+    }
+
+    public function removeDevice(Request $request): JsonResponse
+    {
+        $validated = $request->validate(['token' => ['required', 'string', 'min:20', 'max:512']]);
+        $request->user()->pushDevices()->where('token', $validated['token'])->delete();
+
+        return response()->json(['message' => 'Push qurilma olib tashlandi.']);
+    }
 }

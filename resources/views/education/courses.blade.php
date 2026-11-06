@@ -33,6 +33,7 @@
         @endforelse
     </div>
 
+    @if (auth()->user()->hasPermission('courses.create'))
     <div class="mt-8 rounded-2xl bg-ivory p-6 shadow-sm ring-1 ring-black/5">
         <h3 class="font-semibold text-emerald-deep">{{ __('Yangi kurs') }}</h3>
         <form method="POST" action="{{ route('education.courses.store') }}" class="mt-4 grid gap-3 sm:grid-cols-4">
@@ -51,5 +52,6 @@
             </button>
         </form>
     </div>
+@endif
 <div class="mt-6">{{ $courses->links() }}</div>
 @endsection

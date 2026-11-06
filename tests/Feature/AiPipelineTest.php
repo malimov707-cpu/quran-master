@@ -268,3 +268,23 @@ test('tajweed provider returns null (no fake tajweed results)', function () {
     expect($provider->isConfigured())->toBeFalse()
         ->and($provider->analyze('/tmp/x.wav', []))->toBeNull();
 });
+
+test('pipeline does not discard zero confidence or invent confidence from text similarity', function (?float $confidence, ?float $expectedConfidence) {
+    [, $submission] = aiSubmissionFixture();
+    $surah = Surah::create(['number' => 114, 'name_arabic' => 'الناس', 'name_uz' => 'An-Nos', 'name_en' => 'An-Nas', 'ayah_count' => 6, 'revelation_type' => 'meccan']);
+    Ayah::create(['surah_id' => $surah->id, 'number_in_surah' => 1, 'number_global' => 6231, 'juz' => 30, 'page' => 604, 'text_arabic' => 'قُلْ أَعُوذُ بِرَبِّ النَّاسِ']);
+    $words = array_map(fn ($word) => ['word' => $word, 'start_ms' => null, 'end_ms' => null, 'confidence' => $confidence], ['قل', 'أعوذ', 'برب', 'الناس']);
+    $provider = Mockery::mock(SpeechRecognitionProvider::class);
+    $provider->shouldReceive('isConfigured')->andReturnTrue();
+    $provider->shouldReceive('name')->andReturn('test');
+    $provider->shouldReceive('model')->andReturn('test');
+    $provider->shouldReceive('transcribe')->once()->andReturn(['text' => 'قل أعوذ برب الناس', 'words' => $words, 'language_confidence' => null]);
+    Storage::fake('local');
+    Storage::disk('local')->put('test.wav', 'test');
+    $submission->files()->create(['disk' => 'local', 'path' => 'test.wav', 'mime_type' => 'audio/wav', 'size_bytes' => 4]);
+    $review = AiReview::create(['submission_id' => $submission->id, 'provider' => 'pending']);
+    (new AnalyzeRecitationJob($review->id))->handle($provider, app(TajweedAnalysisProvider::class), app(QuranAlignmentService::class));
+    expect($review->fresh()->status)->toBe('completed');
+    expect($review->fresh()->overall_confidence)->toBe($expectedConfidence);
+    expect($review->fresh()->needs_mentor_review_reason)->not->toBeNull();
+})->with([[0.0, 0.5], [null, null], [-1.0, null], [1.5, null]]);

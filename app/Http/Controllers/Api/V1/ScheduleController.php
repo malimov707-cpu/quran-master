@@ -7,6 +7,8 @@ use App\Models\Attendance;
 use App\Models\Schedule;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class ScheduleController extends Controller
 {
@@ -55,12 +57,30 @@ class ScheduleController extends Controller
             'records.*.note' => ['nullable', 'string', 'max:2000'],
         ]);
 
-        foreach ($data['records'] as $record) {
-            Attendance::updateOrCreate(
-                ['schedule_id' => $schedule->id, 'student_id' => $record['student_id']],
-                ['status' => $record['status'], 'note' => $record['note'] ?? null, 'marked_by' => $request->user()->id],
-            );
+        $studentIds = collect($data['records'])->pluck('student_id');
+        $duplicateStudentIds = $studentIds->duplicates();
+        if ($duplicateStudentIds->isNotEmpty()) {
+            throw ValidationException::withMessages([
+                'records' => 'Bir talaba davomatda faqat bir marta ko\'rsatilishi kerak.',
+            ]);
         }
+
+        $groupStudentIds = $schedule->group()->firstOrFail()->students()->pluck('users.id');
+        $outsiderStudentIds = $studentIds->diff($groupStudentIds);
+        if ($outsiderStudentIds->isNotEmpty()) {
+            throw ValidationException::withMessages([
+                'records' => 'Davomat yozuvlari faqat ushbu guruh o\'quvchilariga tegishli bo\'lishi kerak.',
+            ]);
+        }
+
+        DB::transaction(function () use ($data, $request, $schedule): void {
+            foreach ($data['records'] as $record) {
+                Attendance::updateOrCreate(
+                    ['schedule_id' => $schedule->id, 'student_id' => $record['student_id']],
+                    ['status' => $record['status'], 'note' => $record['note'] ?? null, 'marked_by' => $request->user()->id],
+                );
+            }
+        });
 
         return response()->json([
             'message' => 'Davomat saqlandi.',

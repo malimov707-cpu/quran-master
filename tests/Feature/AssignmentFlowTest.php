@@ -20,7 +20,7 @@ function assignmentFlowFixture(): array
     $mentor = User::where('email', 'mentor@markaz.uz')->firstOrFail();
     $student = User::where('email', 'oquvchi@markaz.uz')->firstOrFail();
     $course = Course::create(['name' => 'Qiroat', 'level' => 'beginner']);
-    $group = Group::create(['name' => 'Qiroat guruhi', 'course_id' => $course->id]);
+    $group = Group::create(['name' => 'Qiroat guruhi', 'course_id' => $course->id, 'mentor_id' => $mentor->id]);
     $group->students()->attach($student, ['joined_at' => now()]);
     $assignment = Assignment::create(['group_id' => $group->id, 'created_by' => $admin->id, 'title' => 'Fotiha', 'status' => 'published']);
 

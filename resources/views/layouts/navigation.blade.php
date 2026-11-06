@@ -35,3 +35,7 @@
         @endif
     @endforeach
 @endif
+
+@if (auth()->user()->hasRole('STUDENT'))<a href="{{ route('learning.index') }}" class="nav-link {{ request()->routeIs('learning.*') ? 'is-active' : '' }}"><x-icon name="calendar"/><span class="nav-label">{{ __('Shaxsiy o‘quv rejam') }}</span></a>@endif
+
+<a href="{{ route('quran.audio') }}" class="nav-link {{ request()->routeIs('quran.audio') ? 'is-active' : '' }}"><x-icon name="book"/><span class="nav-label">{{ __('Audio kutubxona') }}</span></a>

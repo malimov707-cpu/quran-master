@@ -123,14 +123,15 @@ class AnalyzeRecitationJob implements ShouldQueue
             $review->segments()->createMany($segments);
 
             // 5. Confidence — ASR so'z ishonchlari o'rtachasi va similarity kombinatsiyasi
-            $confidences = array_filter(array_column($transcription['words'], 'confidence'));
+            $confidences = array_filter(array_column($transcription['words'], 'confidence'), fn ($confidence): bool => is_numeric($confidence) && $confidence >= 0 && $confidence <= 1);
             $asrConfidence = $confidences ? array_sum($confidences) / count($confidences) : null;
             $overall = $asrConfidence !== null
                 ? round(($asrConfidence + $result['similarity']) / 2, 3)
-                : $result['similarity'];
+                : null;
 
             // Ishonch past bo'lsa avtomatik mentor tekshiruviga
-            $needsMentor = $overall < config('ai.min_confidence', 0.85) || $result['similarity'] < 0.7;
+            $incompleteConfidence = count($confidences) < count($transcription['words']);
+            $needsMentor = $overall === null || $incompleteConfidence || $overall < config('ai.min_confidence', 0.85) || $result['similarity'] < 0.7;
 
             $summary = $this->buildSummary($result, $overall);
 
@@ -139,7 +140,7 @@ class AnalyzeRecitationJob implements ShouldQueue
                 'overall_confidence' => $overall,
                 'summary' => $summary,
                 'needs_mentor_review_reason' => $needsMentor
-                    ? 'AI ishonchliligi past — mentor tekshiruvi talab qilinadi.'
+                    ? ($overall === null || $incompleteConfidence ? 'Nutq ishonchliligi ma’lumoti yetarli emas — mentor tekshiruvi talab qilinadi.' : 'AI ishonchliligi past — mentor tekshiruvi talab qilinadi.')
                     : null,
                 'finished_at' => now(),
             ]);
@@ -164,9 +165,11 @@ class AnalyzeRecitationJob implements ShouldQueue
      *
      * @param  array{missing: list<array{ayah: int, word: string}>, extra: list<array{word: string}>, repetitions: list<array{word: string}>, similarity: float}  $result
      */
-    private function buildSummary(array $result, float $overall): string
+    private function buildSummary(array $result, ?float $overall): string
     {
-        $parts = [sprintf('AI o\'xshashlik: %.0f%%, ishonch: %.0f%%.', $result['similarity'] * 100, $overall * 100)];
+        $parts = [$overall === null
+            ? sprintf('AI o‘xshashlik: %.0f%%. Nutq ishonchliligi berilmagan.', $result['similarity'] * 100)
+            : sprintf('AI o‘xshashlik: %.0f%%, taxminiy ishonch: %.0f%%.', $result['similarity'] * 100, $overall * 100)];
 
         if ($result['missing'] !== []) {
             $words = implode(', ', array_slice(array_column($result['missing'], 'word'), 0, 5));

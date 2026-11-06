@@ -21,7 +21,7 @@ function testAssignmentFixture(): array
     $student = User::where('email', 'oquvchi@markaz.uz')->first();
 
     $course = Course::create(['name' => 'K', 'level' => 'beginner']);
-    $group = Group::create(['name' => 'G', 'course_id' => $course->id]);
+    $group = Group::create(['name' => 'G', 'course_id' => $course->id, 'mentor_id' => $mentor->id]);
     $group->students()->syncWithoutDetaching([$student->id => ['joined_at' => now()]]);
 
     $assignment = Assignment::create([
@@ -226,7 +226,7 @@ test('student cannot open review studio', function () {
 
     // Student role submissions.view bor lekin review yo'q — sahifa ochiladi lekin forma yubora olmaydi.
     // Xavfsizlik asosiy tekshiruv API darajasida bajariladi (yuoqoridagi test).
-    expect(true)->toBeTrue();
+    $response->assertForbidden();
 });
 
 test('mentor reviews submission via web form', function () {

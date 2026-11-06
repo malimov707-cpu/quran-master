@@ -1,20 +1,24 @@
 <?php
 
 use App\Http\Controllers\Api\V1\AssignmentController;
+use App\Http\Controllers\Web\AdministrationController;
 use App\Http\Controllers\Web\AssignmentManagementController;
 use App\Http\Controllers\Web\EducationController;
 use App\Http\Controllers\Web\HomeworkController;
+use App\Http\Controllers\Web\LearningPathController;
 use App\Http\Controllers\Web\LessonWebController;
+use App\Http\Controllers\Web\LocaleController;
 use App\Http\Controllers\Web\MentorReviewWebController;
 use App\Http\Controllers\Web\NotificationWebController;
 use App\Http\Controllers\Web\ParentDashboardController;
+use App\Http\Controllers\Web\QuranAudioController;
 use App\Http\Controllers\Web\QuranController;
 use App\Http\Controllers\Web\ReviewStudioController;
 use App\Http\Controllers\Web\ScheduleController;
 use App\Http\Controllers\Web\WebAuthController as WebAuth;
 use Illuminate\Support\Facades\Route;
 
-Route::post('/interface-locale', \App\Http\Controllers\Web\LocaleController::class)->name('interface.locale');
+Route::post('/interface-locale', LocaleController::class)->name('interface.locale');
 
 Route::get('/', fn () => redirect()->route('dashboard'));
 
@@ -24,7 +28,10 @@ Route::middleware('guest')->group(function (): void {
 });
 
 Route::middleware('auth')->group(function (): void {
-    Route::get('/administration/{section}', [\App\Http\Controllers\Web\AdministrationController::class, 'index'])->name('administration');
+    Route::get('/administration/{section}', [AdministrationController::class, 'index'])->name('administration');
+    Route::get('/learning-path', [LearningPathController::class, 'index'])->name('learning.index');
+    Route::post('/learning-path/cards', [LearningPathController::class, 'store'])->name('learning.store');
+    Route::post('/learning-path/cards/{card}/review', [LearningPathController::class, 'review'])->whereNumber('card')->name('learning.review');
     Route::get('/dashboard', [WebAuth::class, 'dashboard'])->name('dashboard');
     Route::get('/lessons', [LessonWebController::class, 'index'])->name('education.lessons');
     Route::post('/lessons', [LessonWebController::class, 'store'])->name('education.lessons.store');
@@ -59,7 +66,18 @@ Route::middleware('auth')->group(function (): void {
     Route::post('/groups/add-student', [EducationController::class, 'groupsAddStudentFromSelect'])->name('education.groups.add-student.select');
     Route::post('/groups/{group}/mentor', [EducationController::class, 'groupsAssignMentor'])->name('education.groups.assign-mentor');
 
+    Route::prefix('/audio')->group(function (): void {
+        Route::post('/lists', [App\Http\Controllers\Api\V1\QuranAudioController::class, 'storeList'])->middleware('throttle:20,1');
+        Route::delete('/lists/{list}', [App\Http\Controllers\Api\V1\QuranAudioController::class, 'destroyList'])->whereNumber('list');
+        Route::get('/catalog', [App\Http\Controllers\Api\V1\QuranAudioController::class, 'index'])->name('audio.catalog');
+        Route::get('/playlist/{edition}/{surah}', [App\Http\Controllers\Api\V1\QuranAudioController::class, 'playlist'])->name('audio.playlist');
+        Route::put('/preferences', [App\Http\Controllers\Api\V1\QuranAudioController::class, 'preferences'])->name('audio.preferences');
+        Route::post('/history', [App\Http\Controllers\Api\V1\QuranAudioController::class, 'history'])->middleware('throttle:60,1')->name('audio.history');
+        Route::post('/favorites/{edition}', [App\Http\Controllers\Api\V1\QuranAudioController::class, 'favorite'])->name('audio.favorite');
+    });
+
     // Qur'on moduli
+    Route::get('/quran/audio-library', [QuranAudioController::class, 'index'])->name('quran.audio');
     Route::get('/quran', [QuranController::class, 'surahsIndex'])->name('quran.surahs');
     Route::get('/quran/{surah}', [QuranController::class, 'surahShow'])->name('quran.surah');
 

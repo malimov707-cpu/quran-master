@@ -47,11 +47,12 @@ document.querySelectorAll('form').forEach(form => form.addEventListener('submit'
     if (event.defaultPrevented) return;
     if (form.method.toLowerCase() !== 'post') return;
     form.querySelectorAll('button:not([type=button]):not([type=reset])').forEach(button => {
-        button.disabled = true;
+        setTimeout(() => { button.disabled = true; }, 0);
         button.setAttribute('aria-busy', 'true');
     });
 }));
 window.addEventListener('pageshow', () => document.querySelectorAll('button[aria-busy]').forEach(button => { button.disabled = false; button.removeAttribute('aria-busy'); }));
+function initializeReader() {
 const reader = document.querySelector('[data-reader]');
 if (reader) {
     let size = Number(storage.get('quran-reader-size')) || 30;
@@ -75,6 +76,10 @@ if (reader) {
         });
     });
 }
+
+}
+initializeReader();
+document.addEventListener('quran:page', initializeReader);
 
 document.querySelector('[data-locale-select]')?.addEventListener('change', event => event.target.form.requestSubmit());
 document.querySelectorAll('[data-audio-studio]').forEach(studio => {
@@ -134,3 +139,5 @@ confirmation?.addEventListener('close', () => {
 });
 const reviewAction = document.querySelector('#review-action');
 reviewAction?.addEventListener('change', () => document.querySelector('#review-score').required = reviewAction.value === 'approve');
+
+import './quran-audio';

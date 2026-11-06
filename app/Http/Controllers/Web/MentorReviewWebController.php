@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Web;
 use App\Http\Controllers\Controller as BaseController;
 use App\Models\Submission;
 use App\Models\User;
+use App\Services\Submissions\SubmissionAccess;
 use App\Services\Submissions\SubmissionService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -19,6 +20,7 @@ class MentorReviewWebController extends BaseController
         $mentor = $request->user();
         abort_unless($mentor->hasPermission('submissions.review'), 403);
 
+        app(SubmissionAccess::class)->authorizeReview($mentor, $submission);
         $data = $request->validate([
             'score' => ['required_if:action,approve', 'nullable', 'integer', 'min:0', 'max:100'],
             'comment' => ['nullable', 'string'],

@@ -65,6 +65,11 @@ class User extends Authenticatable
         return $this->hasMany(AppNotification::class);
     }
 
+    public function pushDevices(): HasMany
+    {
+        return $this->hasMany(PushDevice::class);
+    }
+
     /**
      * Foydalanuvchi permissionlari (rollar orqali).
      */

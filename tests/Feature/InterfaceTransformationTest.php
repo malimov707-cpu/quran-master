@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Quran\Surah;
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -22,7 +23,7 @@ test('admin user search applies both search and role filters and escapes names',
     $this->seed(DatabaseSeeder::class);
     $admin = User::where('email', 'admin@quronai.uz')->firstOrFail();
     $member = User::factory()->create(['name' => '<script>Member</script>']);
-    $member->roles()->attach(\App\Models\Role::where('name', 'STUDENT')->firstOrFail());
+    $member->roles()->attach(Role::where('name', 'STUDENT')->firstOrFail());
     $response = $this->actingAs($admin)->get(route('administration', ['section' => 'users', 'q' => 'Member', 'role' => 'STUDENT']))
         ->assertOk()->assertSee('&lt;script&gt;Member&lt;/script&gt;', false)->assertDontSee('<script>Member</script>', false);
     expect($response->viewData('users')->total())->toBe(1);

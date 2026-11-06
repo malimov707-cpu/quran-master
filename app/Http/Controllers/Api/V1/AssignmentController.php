@@ -7,6 +7,7 @@ use App\Models\Assignment;
 use App\Models\Submission;
 use App\Models\SubmissionFile;
 use App\Models\User;
+use App\Services\Submissions\SubmissionAccess;
 use App\Services\Submissions\SubmissionService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -51,7 +52,7 @@ class AssignmentController extends Controller
     {
         abort_unless($file->submission_id === $submission->id, 404);
         $user = $request->user();
-        abort_unless($submission->student_id === $user->id || $user->hasPermission('submissions.review'), 403);
+        app(SubmissionAccess::class)->authorizeView($user, $submission);
         $disk = Storage::disk($file->disk);
         abort_unless($disk->exists($file->path), 404);
         $headers = ['Content-Type' => $file->mime_type, 'Cache-Control' => 'private, no-store'];
@@ -140,7 +141,7 @@ class AssignmentController extends Controller
         $user = $request->user();
         abort_unless($user->hasPermission('submissions.review'), 403);
 
-        $submissions = Submission::query()
+        $submissions = app(SubmissionAccess::class)->reviewable($user)
             ->whereIn('status', ['submitted', 'in_review', 'resubmit'])
             ->with(['assignment:id,title,surah_number,ayah_from,ayah_to', 'student:id,name', 'files'])
             ->orderBy('submitted_at')
@@ -158,6 +159,7 @@ class AssignmentController extends Controller
         $user = $request->user();
         abort_unless($user->hasPermission('submissions.review'), 403);
 
+        app(SubmissionAccess::class)->authorizeReview($user, $submission);
         $data = $request->validate([
             'score' => ['required_if:action,approve', 'nullable', 'integer', 'min:0', 'max:100'],
             'comment' => ['nullable', 'string'],
@@ -184,8 +186,7 @@ class AssignmentController extends Controller
     {
         /** @var User $user */
         $user = $request->user();
-        $isOwner = $submission->student_id === $user->id;
-        abort_unless($isOwner || $user->hasPermission('submissions.review'), 403);
+        app(SubmissionAccess::class)->authorizeView($user, $submission);
 
         return response()->json($submission->load(['assignment', 'student:id,name,email', 'files', 'reviews.mentor:id,name', 'reviews.segments']));
     }

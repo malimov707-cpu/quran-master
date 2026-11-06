@@ -21,6 +21,7 @@ class EducationController extends BaseController
 
     public function coursesIndex(Request $request): View
     {
+        abort_unless(auth()->user()->hasPermission('courses.view'), 403);
         $courses = Course::with('headTeacher:id,name')->withCount(['groups', 'lessons'])->orderByDesc('created_at')->paginate(12);
 
         $canViewLessons = $request->user()->hasPermission('lessons.view');
@@ -30,6 +31,7 @@ class EducationController extends BaseController
 
     public function coursesStore(Request $request): RedirectResponse
     {
+        abort_unless(auth()->user()->hasPermission('courses.create'), 403);
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'level' => ['required', 'in:beginner,intermediate,advanced'],
@@ -44,6 +46,7 @@ class EducationController extends BaseController
 
     public function groupsIndex(): View
     {
+        abort_unless(auth()->user()->hasPermission('groups.view'), 403);
         $groups = Group::with(['course:id,name', 'teacher:id,name', 'mentor:id,name'])
             ->withCount('students')
             ->orderBy('name')
@@ -58,6 +61,7 @@ class EducationController extends BaseController
 
     public function groupsStore(Request $request): RedirectResponse
     {
+        abort_unless(auth()->user()->hasPermission('groups.create'), 403);
         $data = $request->validate([
             'name' => ['required', 'string', 'max:128'],
             'course_id' => ['required', 'exists:courses,id'],
@@ -72,6 +76,7 @@ class EducationController extends BaseController
 
     public function groupsAddStudent(Request $request, Group $group): RedirectResponse
     {
+        abort_unless(auth()->user()->hasPermission('groups.update'), 403);
         $data = $request->validate(['student_id' => ['required', 'exists:users,id']]);
 
         app(GroupService::class)->addStudent($group, User::findOrFail($data['student_id']));
@@ -81,6 +86,7 @@ class EducationController extends BaseController
 
     public function groupsAddStudentFromSelect(Request $request): RedirectResponse
     {
+        abort_unless(auth()->user()->hasPermission('groups.update'), 403);
         $data = $request->validate([
             'group_id' => ['required', 'exists:groups,id'],
             'student_id' => ['required', 'exists:users,id'],
@@ -94,6 +100,7 @@ class EducationController extends BaseController
 
     public function groupsAssignMentor(Request $request, Group $group): RedirectResponse
     {
+        abort_unless(auth()->user()->hasPermission('groups.update'), 403);
         $data = $request->validate(['mentor_id' => ['required', 'exists:users,id']]);
 
         app(GroupService::class)->assignMentor($group, User::findOrFail($data['mentor_id']));

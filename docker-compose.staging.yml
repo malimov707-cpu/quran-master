@@ -1,0 +1,24 @@
+services:
+  app:
+    environment:
+      APP_ENV: staging
+      APP_DEBUG: "false"
+      LOG_CHANNEL: stderr
+      SESSION_SECURE_COOKIE: "true"
+      TRUSTED_PROXIES: "*"
+    restart: unless-stopped
+
+  worker:
+    environment:
+      APP_ENV: staging
+      APP_DEBUG: "false"
+      LOG_CHANNEL: stderr
+      SESSION_SECURE_COOKIE: "true"
+    restart: unless-stopped
+
+  scheduler:
+    environment:
+      APP_ENV: staging
+      APP_DEBUG: "false"
+      LOG_CHANNEL: stderr
+    restart: unless-stopped

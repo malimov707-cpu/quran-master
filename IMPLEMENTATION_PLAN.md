@@ -10,6 +10,15 @@
 - Docker app entrypoint performs migrations and serves the API; a dedicated Redis queue worker runs background AI jobs.
 - Known constraint: the prompt requested Java/Spring Boot, while production work continues on the repository's existing Laravel 13/PHP 8.4 stack. Migration to Java is a platform rewrite, not a safe incremental change to existing working code.
 
+## Audio library verification (2026-11-06)
+
+- Seven configured editions were checked against all 6236 ayah URLs.
+- Alafasy, Abdul Basit Murattal, Maher Al-Muaiqly, Abdul Rahman Al-Sudais, Al-Husary, and Minshawi Mujawwad have 6236/6236 available ayah records.
+- Minshawi Murattal has 6235/6236 ayah records. The confirmed gap is surah 31, ayah 15.
+- Web playlists omit unavailable records and report incomplete availability instead of presenting a broken URL.
+- Web and Expo audio players build successfully; native Android/iOS recording and device playback remain external-device acceptance gates.
+- Final local verification: 220 backend tests and 939 assertions pass; PHP formatting passes; Laravel production assets build; mobile TypeScript passes; Expo web production export passes.
+
 ## Phase 0 — Repository Audit (2026-11-04)
 
 ### Topilgan holat

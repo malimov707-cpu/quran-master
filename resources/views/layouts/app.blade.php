@@ -3,6 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="theme-color" content="#064E3B">
     <title>@yield('title', 'Qur\'on AI Ustoz')</title>
     <script>try { document.documentElement.dataset.theme = localStorage.getItem('quran-theme') || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'); } catch {}</script>
@@ -35,10 +36,11 @@
             @if ($errors && $errors->any())<div role="alert" class="feedback feedback-error"><strong>{{ __('Ma’lumotlarni tekshiring') }}</strong><p>{{ $errors->first() }}</p></div>@endif
             @if (session('status'))<div role="status" class="feedback feedback-success">{{ session('status') }}<button type="button" data-dismiss-alert aria-label="{{ __('Xabarni yopish') }}">×</button></div>@endif
             @yield('content')
-            <footer class="page-footer"><span>Qur’on AI Ustoz</span><span>{{ __('Ilm. E’tibor. Taraqqiyot.') }}</span></footer>
+            <footer class="page-footer"><span>Qur’on AI Ustoz · <a href="https://commons.wikimedia.org/wiki/File:Center_of_Islamic_Civilization_of_Uzbekistan_Tashkent_2026_001.jpg" target="_blank" rel="noopener">{{ __('Fon surati') }}: Зинҳор Насрӣ</a> · <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener">{{ __('CC BY-SA 4.0') }}</a> · {{ __('o‘lchami moslashtirilgan') }}</span><span>{{ __('Ilm. E’tibor. Taraqqiyot.') }}</span></footer>
         </main>
     </div>
     <dialog id="confirmation-dialog" class="confirmation-dialog"><form method="dialog"><h2 data-confirm-message class="text-lg font-bold"></h2><div class="mt-6 flex justify-end gap-3"><button value="cancel" class="bookmark-button">{{ __('Bekor qilish') }}</button><button value="confirm" class="confirm-accept">{{ __('Tasdiqlash') }}</button></div></form></dialog>
+    @include('quran.audio-player')
     @stack('scripts')
 </body>
 </html>

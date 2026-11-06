@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use App\Models\Submission;
 use App\Models\User;
+use App\Services\Submissions\SubmissionAccess;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -17,8 +18,7 @@ class AiController extends Controller
     {
         /** @var User $user */
         $user = $request->user();
-        $isOwner = $submission->student_id === $user->id;
-        abort_unless($isOwner || $user->hasPermission('submissions.review'), 403);
+        app(SubmissionAccess::class)->authorizeView($user, $submission);
 
         $review = $submission->aiReviews()->with('segments')->latest()->first();
 

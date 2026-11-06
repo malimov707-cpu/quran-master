@@ -29,6 +29,18 @@ return [
     */
 
     'disks' => [
+        'backups' => [
+            'driver' => 's3',
+            'key' => env('AWS_BACKUPS_ACCESS_KEY_ID', env('AWS_ACCESS_KEY_ID')),
+            'secret' => env('AWS_BACKUPS_SECRET_ACCESS_KEY', env('AWS_SECRET_ACCESS_KEY')),
+            'region' => env('AWS_BACKUPS_DEFAULT_REGION', env('AWS_DEFAULT_REGION', 'us-east-1')),
+            'bucket' => env('AWS_BACKUPS_BUCKET', env('AWS_BUCKET')),
+            'url' => env('AWS_BACKUPS_URL'),
+            'endpoint' => env('AWS_BACKUPS_ENDPOINT', env('AWS_ENDPOINT')),
+            'use_path_style_endpoint' => env('AWS_BACKUPS_USE_PATH_STYLE_ENDPOINT', env('AWS_USE_PATH_STYLE_ENDPOINT', false)),
+            'throw' => true,
+            'report' => false,
+        ],
 
         'local' => [
             'driver' => 'local',

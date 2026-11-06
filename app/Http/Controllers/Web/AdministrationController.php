@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Web;
 use App\Http\Controllers\Controller;
 use App\Models\Role;
 use App\Models\User;
+use App\Services\AI\Contracts\SpeechRecognitionProvider;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
@@ -32,7 +33,7 @@ class AdministrationController extends Controller
             ->when($filters['q'] ?? null, fn ($query, $search) => $query->where('audit_logs.action', 'like', '%'.$search.'%'))
             ->orderByDesc('audit_logs.id')->paginate(20)->withQueryString() : null;
         $titles = ['users' => 'Foydalanuvchilar', 'roles' => 'Rollar va ruxsatlar', 'payments' => 'To‘lovlar', 'ai' => 'AI xizmatlari', 'audit' => 'Faoliyat jurnali', 'settings' => 'Tizim sozlamalari'];
-        $speechConfigured = filled(config('services.openai.api_key'));
+        $speechConfigured = app(SpeechRecognitionProvider::class)->isConfigured();
 
         return view('administration.index', compact('section', 'users', 'roles', 'logs', 'filters', 'speechConfigured') + ['pageTitle' => $titles[$section]]);
     }

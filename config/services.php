@@ -40,4 +40,15 @@ return [
         'key' => env('OPENAI_API_KEY'),
         'whisper_model' => env('WHISPER_MODEL', 'whisper-1'),
     ],
+
+    'fcm' => [
+        'server_key' => env('FCM_SERVER_KEY'),
+        'endpoint' => env('FCM_ENDPOINT', 'https://fcm.googleapis.com/fcm/send'),
+        'expo_endpoint' => env('EXPO_PUSH_ENDPOINT', 'https://exp.host/--/api/v2/push/send'),
+    ],
+
+    'telegram' => [
+        'bot_token' => env('TELEGRAM_BOT_TOKEN'),
+        'chat_id' => env('TELEGRAM_CHAT_ID'),
+    ],
 ];
