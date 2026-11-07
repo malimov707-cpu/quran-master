@@ -22,6 +22,7 @@
     </div>
 
     @if ($selectedChild && $progress)
+        @include('education.quiz-progress', ['quizProgress' => $progress['quizzes']])
         <h2 class="mb-4 text-xl font-semibold text-emerald-deep">{{ $selectedChild->name }}</h2>
         <div class="grid gap-4 sm:grid-cols-3">
             <div class="rounded-2xl bg-ivory p-6 shadow-sm ring-1 ring-black/5">

@@ -9,6 +9,9 @@ use App\Models\Lesson;
 use App\Models\Submission;
 use App\Models\User;
 use App\Services\DashboardService;
+use App\Services\Progress\StudentJourneyService;
+use App\Services\QuizService;
+use App\Services\RegistrationService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -18,6 +21,20 @@ use Illuminate\View\View;
 
 class WebAuthController extends BaseController
 {
+    public function showRegister(): View
+    {
+        return view('auth.register');
+    }
+
+    public function register(Request $request, RegistrationService $registration): RedirectResponse
+    {
+        $user = $registration->register($request->all());
+        auth()->login($user);
+        $request->session()->regenerate();
+
+        return redirect()->route('dashboard')->with('status', __('Xush kelibsiz! Akkauntingiz yaratildi.'));
+    }
+
     public function showLogin(): View
     {
         return view('auth.login');
@@ -30,7 +47,7 @@ class WebAuthController extends BaseController
             'password' => ['required', 'string'],
         ]);
 
-        $user = User::where('email', $data['email'])->first();
+        $user = User::whereRaw('LOWER(email) = ?', [mb_strtolower(trim($data['email']))])->first();
 
         if (! $user || ! Hash::check($data['password'], $user->password)) {
             throw ValidationException::withMessages([
@@ -48,7 +65,12 @@ class WebAuthController extends BaseController
         $request->session()->regenerate();
         $user->forceFill(['last_login_at' => now()])->save();
 
-        return redirect()->intended(route('dashboard'));
+        // Web'da API so'rovlari uchun token (AI voice va boshqa JS integratsiyalar)
+        $apiToken = $user->createToken('web')->plainTextToken;
+
+        return redirect()->intended(route('dashboard'))->withCookie(
+            cookie('web_token', $apiToken, 60 * 24 * 30, path: '/', httpOnly: false, sameSite: 'lax')
+        );
     }
 
     public function dashboard(Request $request, DashboardService $dashboard): View
@@ -120,7 +142,11 @@ class WebAuthController extends BaseController
             }
         }
 
-        return view('dashboard', compact('cards', 'user', 'isAdministration', 'newUsers', 'registrationChart') + $dashboard->forUser($user, $days));
+        $studentJourney = ! $isAdministration && $user->hasRole('STUDENT') && $can('progress.view') ? app(StudentJourneyService::class)->overview($user) : null;
+
+        $quizProgress = $studentJourney ? app(QuizService::class)->progress($user) : null;
+
+        return view('dashboard', compact('cards', 'user', 'isAdministration', 'newUsers', 'registrationChart', 'studentJourney', 'quizProgress') + $dashboard->forUser($user, $days));
     }
 
     public function logout(Request $request): RedirectResponse

@@ -43,4 +43,5 @@
             <p class="text-sm text-graysoft">{{ __('Mentor hali tekshirmagan.') }}</p>
         @endforelse
     </div>
+    @if ($canAcknowledge)<section class="glass-panel mt-6 p-6"><h2 class="font-semibold text-forest">{{ __('Natijadan keyingi qadam') }}</h2><p class="mt-2 text-sm text-graysoft">{{ __('Ustoz izohlarini o‘qiganingizni belgilang. Faqat ustoz qayd etgan oyatlar shaxsiy takrorlashga qo‘shiladi.') }}</p><form method="POST" action="{{ route('student.feedback.read', $submission) }}" class="mt-4">@csrf<button type="submit" class="rounded-xl bg-forest px-5 py-3 font-semibold text-white">{{ __('Ustoz tavsiyalarini o‘qidim') }} →</button></form></section>@endif
 @endsection

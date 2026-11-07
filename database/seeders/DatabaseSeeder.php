@@ -76,6 +76,10 @@ class DatabaseSeeder extends Seeder
 
     public function run(): void
     {
+        if (! app()->environment('testing')) {
+            $this->call(QuranDataSeeder::class);
+        }
+
         // Rollar
         $roles = [];
         foreach (self::ROLES as $name => $label) {

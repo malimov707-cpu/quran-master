@@ -9,6 +9,7 @@ use App\Services\Submissions\SubmissionService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
@@ -47,7 +48,9 @@ class HomeworkController extends Controller
         $submissions = $assignment->submissions()->where('student_id', $request->user()->id)->orderByDesc('attempt')->get();
         $statusLabels = self::STATUS_LABELS;
 
-        return view('homework.show', compact('assignment', 'submissions', 'statusLabels'));
+        $practiced = DB::table('assignment_practices')->where('user_id', $request->user()->id)->where('assignment_id', $assignment->id)->exists();
+
+        return view('homework.show', compact('assignment', 'submissions', 'statusLabels', 'practiced'));
     }
 
     public function submit(Request $request, Assignment $assignment): RedirectResponse
@@ -77,6 +80,8 @@ class HomeworkController extends Controller
             && $submission->status === 'resubmit' && $submission->assignment->status === 'published'
             && $submission->assignment->group->students()->where('users.id', $request->user()->id)->exists();
 
-        return view('homework.submission', compact('submission', 'aiReview', 'statusLabels', 'canResubmit'));
+        $canAcknowledge = $submission->student_id === $request->user()->id && $request->user()->hasRole('STUDENT') && $request->user()->hasPermission('progress.view') && in_array($submission->status, ['graded', 'resubmit'], true) && $submission->reviews->isNotEmpty();
+
+        return view('homework.submission', compact('submission', 'aiReview', 'statusLabels', 'canResubmit', 'canAcknowledge'));
     }
 }

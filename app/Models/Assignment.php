@@ -19,6 +19,12 @@ class Assignment extends Model
         return ['due_at' => 'datetime', 'requires_audio' => 'boolean'];
     }
 
+    /** @return BelongsTo<Lesson, $this> */
+    public function lesson(): BelongsTo
+    {
+        return $this->belongsTo(Lesson::class);
+    }
+
     /**
      * Guruh.
      *

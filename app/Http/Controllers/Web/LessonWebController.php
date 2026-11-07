@@ -5,9 +5,12 @@ namespace App\Http\Controllers\Web;
 use App\Http\Controllers\Controller;
 use App\Models\Course;
 use App\Models\Lesson;
+use App\Services\Progress\StudentJourneyService;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
@@ -33,22 +36,33 @@ class LessonWebController extends Controller
         abort_unless($lesson->status === 'published' || $canUpdate, 404);
         $lesson->load(['course:id,name', 'materials']);
 
-        return view('education.lesson', compact('lesson', 'canUpdate'));
+        $canComplete = $request->user()->hasRole('STUDENT') && $request->user()->hasPermission('progress.view') && app(StudentJourneyService::class)->eligibleLesson($request->user(), $lesson);
+        $completed = $canComplete && DB::table('lesson_completions')->where('user_id', $request->user()->id)->where('lesson_id', $lesson->id)->exists();
+
+        return view('education.lesson', compact('lesson', 'canUpdate', 'canComplete', 'completed'));
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request): JsonResponse|RedirectResponse
     {
         abort_unless($request->user()->hasPermission('lessons.create'), 403);
         $data = $request->validate($this->rules() + ['course_id' => ['required', 'integer', 'exists:courses,id']]);
         $lesson = Lesson::create($data + ['created_by' => $request->user()->id]);
 
+        if ($request->expectsJson()) {
+            return response()->json(['message' => __('Dars yaratildi.'), 'record' => $lesson], 201);
+        }
+
         return redirect()->route('education.lessons.show', $lesson)->with('status', 'Dars yaratildi.');
     }
 
-    public function update(Request $request, Lesson $lesson): RedirectResponse
+    public function update(Request $request, Lesson $lesson): JsonResponse|RedirectResponse
     {
         abort_unless($request->user()->hasPermission('lessons.update'), 403);
         $lesson->update($request->validate($this->rules()));
+
+        if ($request->expectsJson()) {
+            return response()->json(['message' => __('Dars yangilandi.'), 'record' => $lesson], 200);
+        }
 
         return redirect()->route('education.lessons.show', $lesson)->with('status', 'Dars yangilandi.');
     }

@@ -10,6 +10,10 @@
         <div class="welcome-divider"></div>
         <p class="!text-xs text-graysoft">{{ __($isAdministration ? 'Ta’lim markazingizning bugungi holati — bir joyda.' : 'Ilm sari har bir kichik qadam qadrlidir.') }}</p>
     </section>
+    @include('components.prayer-times')
+    @if ($quizProgress) @include('education.quiz-progress', ['quizProgress' => $quizProgress]) @endif
+    @if ($studentJourney) @include('learning.journey', ['journey' => $studentJourney]) @endif
+    @if (! $studentJourney)
     <div class="grid gap-4 grid-cols-2 xl:grid-cols-4">
         @foreach ($cards as $i => $card)
             <article class="metric-card glass-panel">
@@ -22,6 +26,7 @@
         @endforeach
     </div>
 
+    @endif
     <div class="mt-6 grid gap-4 xl:grid-cols-[1.4fr_1fr]">
         <section class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-black/5">
             <div class="flex flex-wrap items-center justify-between gap-3"><h2 class="font-bold text-emerald-deep">{{ __('Davomat statistikasi') }}</h2><div class="flex gap-2 text-xs"><a href="{{ route('dashboard', ['period' => 'week']) }}" @if ($chartDays === 7) aria-current="true" @endif class="period-link {{ $chartDays === 7 ? 'selected' : '' }}">{{ __('Hafta') }}</a><a href="{{ route('dashboard', ['period' => 'month']) }}" @if ($chartDays === 30) aria-current="true" @endif class="period-link {{ $chartDays === 30 ? 'selected' : '' }}">{{ __('Oy') }}</a></div></div>

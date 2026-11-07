@@ -45,6 +45,9 @@ return [
         'key' => env('OPENROUTER_API_KEY'),
         'model' => env('OPENROUTER_MODEL', 'nvidia/nemotron-3.5-super-vl:free'),
         'base_url' => env('OPENROUTER_BASE_URL', 'https://openrouter.ai/api/v1'),
+        'voice_model' => env('OPENROUTER_VOICE_MODEL', 'google/gemini-2.5-flash'),
+        'voice_speech_model' => env('OPENROUTER_VOICE_SPEECH_MODEL', 'google/gemini-3.1-flash-tts-preview'),
+        'voice_name' => env('OPENROUTER_VOICE_NAME', 'Kore'),
     ],
 
     'fcm' => [

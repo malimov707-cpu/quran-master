@@ -1,3 +1,4 @@
+import './prayer-times';
 const storage = {
     get(key) { try { return localStorage.getItem(key); } catch { return null; } },
     set(key, value) { try { localStorage.setItem(key, value); } catch {} },
@@ -141,3 +142,8 @@ const reviewAction = document.querySelector('#review-action');
 reviewAction?.addEventListener('change', () => document.querySelector('#review-score').required = reviewAction.value === 'approve');
 
 import './quran-audio';
+
+// Alpine.js — AI voice chat sahifasi uchun
+import Alpine from 'alpinejs';
+window.Alpine = Alpine;
+Alpine.start();

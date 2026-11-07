@@ -49,6 +49,58 @@ class ImportQuranAudio extends Command
                 }
             }
             foreach ($editions as $identifier => $definition) {
+                if (($definition['provider'] ?? null) === 'mp3quran') {
+                    $catalogResponse = Http::acceptJson()->timeout(30)->get('https://mp3quran.net/api/v3/reciters?language=eng');
+                    $catalogResponse->throw();
+                    $catalog = $catalogResponse->body();
+                    $reciter = Reciter::firstOrCreate(['name' => $definition['name']], [
+                        'style' => $definition['style'],
+                        'audio_base_url' => $definition['surah_base_url'],
+                        'licensed' => true,
+                    ]);
+                    $edition = AudioEdition::updateOrCreate(['identifier' => $identifier], [
+                        'reciter_id' => $reciter->id,
+                        'provider' => 'mp3quran',
+                        'bitrate' => $definition['bitrate'],
+                        'style' => $definition['style'],
+                        'source_url' => $definition['source_url'],
+                        'license_url' => $definition['license_url'],
+                        'license' => 'Official mp3quran streaming catalog; reciter rights retained; usage subject to mp3quran terms.',
+                        'version' => '2026-11-06',
+                        'offline_allowed' => false,
+                        'manifest_sha256' => hash('sha256', $catalog),
+                        'catalog_checked_at' => now(),
+                    ]);
+                    $rows = [];
+                    foreach ($surahs as $surah) {
+                        $rows[] = [
+                            'edition_id' => $edition->id,
+                            'surah_id' => $surah->id,
+                            'ayah_id' => null,
+                            'kind' => 'surah',
+                            'number' => $surah->number,
+                            'url' => rtrim($definition['surah_base_url'], '/').'/'.str_pad((string) $surah->number, 3, '0', STR_PAD_LEFT).'.mp3',
+                            'status' => 'listed',
+                            'size_bytes' => null,
+                            'etag' => null,
+                            'http_status' => null,
+                            'verified_at' => null,
+                            'created_at' => now(),
+                            'updated_at' => now(),
+                        ];
+                    }
+                    foreach (array_chunk($rows, 250) as $chunk) {
+                        AudioFile::upsert($chunk, ['edition_id', 'kind', 'number'], [
+                            'surah_id', 'ayah_id', 'url', 'status', 'size_bytes', 'etag', 'http_status', 'verified_at', 'updated_at',
+                        ]);
+                    }
+                    $this->info($identifier.': surah inventory '.$edition->files()->where('kind', 'surah')->count().'/114');
+                    if ($this->option('verify')) {
+                        $this->verify($edition);
+                    }
+
+                    continue;
+                }
                 $reciter = Reciter::firstOrCreate(['name' => $definition['name']], ['style' => $definition['style'], 'audio_base_url' => config('quran_audio.cdn'), 'licensed' => true]);
                 $edition = AudioEdition::updateOrCreate(['identifier' => $identifier], [
                     'reciter_id' => $reciter->id, 'provider' => config('quran_audio.provider'), 'bitrate' => $definition['bitrate'], 'style' => $definition['style'],

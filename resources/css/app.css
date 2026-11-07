@@ -166,3 +166,11 @@ button:disabled { cursor: wait; opacity: .6; }
 body.has-quran-audio .app-content { padding-bottom: 150px; }
 @media(max-width:767px) { .quran-mini-player { left: 50%; width: calc(100vw - 24px); bottom: 10px; padding: 12px; }.audio-control { width: 38px; height: 38px; }.mini-title strong { font-size: 11px; } }
 @media(prefers-reduced-motion:no-preference) { .reader-ayah.is-playing { transition: outline-color .2s,background-color .2s; } }
+.journey-steps { display: grid; grid-template-columns: repeat(5,minmax(0,1fr)); gap: 10px; }
+.journey-step { display: flex; align-items: center; gap: 9px; color: var(--muted); padding-block: 12px; border-bottom: 2px solid var(--surface-soft); min-width: 0; font-size: 12px; }
+.journey-step>span:first-child { display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; width: 29px; height: 29px; border-radius: 50%; background: var(--surface-soft); font-size: 11px; }
+.journey-step small { display: block; font-size: 9px; margin-top: 3px; }
+.journey-step.current { border-color: #c6a15b; color: var(--accent); font-weight: 700; }
+.journey-step.current>span:first-child { background: #064e3b; color: #f8f5ec; }
+.journey-step.done>span:first-child { background: #c6a15b30; color: var(--accent); }
+@media(max-width:639px) { .journey-steps { gap: 4px; }.journey-step { flex-direction: column; text-align: center; gap: 6px; font-size: 9px; }.journey-step small { font-size: 8px; } }

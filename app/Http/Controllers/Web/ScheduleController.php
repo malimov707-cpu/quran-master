@@ -8,6 +8,7 @@ use App\Models\Group;
 use App\Models\Schedule;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -71,7 +72,7 @@ class ScheduleController extends Controller
         return view('education.attendance', compact('schedule', 'students', 'attendance', 'hasStarted'));
     }
 
-    public function saveAttendance(Request $request, Schedule $schedule): RedirectResponse
+    public function saveAttendance(Request $request, Schedule $schedule): JsonResponse|RedirectResponse
     {
         abort_unless($request->user()->hasPermission('attendance.manage'), 403);
         abort_unless($this->hasStarted($schedule), 422, 'Davomat dars boshlangandan keyin kiritiladi.');
@@ -92,6 +93,10 @@ class ScheduleController extends Controller
                 ]);
             }
         });
+
+        if ($request->expectsJson()) {
+            return response()->json(['message' => __('Davomat saqlandi.')]);
+        }
 
         return redirect()->route('education.attendance', $schedule)->with('status', 'Davomat saqlandi.');
     }

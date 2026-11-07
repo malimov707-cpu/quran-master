@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Middleware\EnsureActiveAccount;
+use App\Http\Middleware\EnsureAdministration;
 use App\Http\Middleware\EnsureUserHasPermission;
 use App\Http\Middleware\SetInterfaceLocale;
 use Illuminate\Foundation\Application;
@@ -18,6 +20,8 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(append: [SetInterfaceLocale::class]);
         $middleware->alias([
             'permission' => EnsureUserHasPermission::class,
+            'active-account' => EnsureActiveAccount::class,
+            'administration' => EnsureAdministration::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

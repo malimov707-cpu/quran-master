@@ -41,6 +41,7 @@
     </div>
     <dialog id="confirmation-dialog" class="confirmation-dialog"><form method="dialog"><h2 data-confirm-message class="text-lg font-bold"></h2><div class="mt-6 flex justify-end gap-3"><button value="cancel" class="bookmark-button">{{ __('Bekor qilish') }}</button><button value="confirm" class="confirm-accept">{{ __('Tasdiqlash') }}</button></div></form></dialog>
     @include('quran.audio-player')
+    @include('layouts.ai-assistant')
     @stack('scripts')
 </body>
 </html>

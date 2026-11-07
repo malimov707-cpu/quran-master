@@ -17,7 +17,7 @@ test('ceo sees all ai capabilities without requiring premium', function () {
         ->getJson('/api/v1/ai/capabilities')
         ->assertOk()
         ->assertJsonPath('premium', true)
-        ->assertJsonFragment(['Premium boshqaruvi']);
+        ->assertJsonFragment(['Premium va AI boshqaruvi']);
 });
 
 test('student ai is blocked without premium or high score', function () {
@@ -51,4 +51,15 @@ test('student with premium can reach configured provider', function () {
         ->postJson('/api/v1/ai/chat', ['question' => 'Tajvidni tushuntir'])
         ->assertStatus(503)
         ->assertJsonPath('status', 'unavailable');
+});
+
+test('role assistant returns distinct task prompts', function () {
+    config()->set('services.openrouter.key', null);
+    $mentor = User::where('email', 'mentor@markaz.uz')->firstOrFail();
+
+    $this->actingAs($mentor, 'sanctum')
+        ->getJson('/api/v1/ai/capabilities')
+        ->assertOk()
+        ->assertJsonFragment(['Shaxsiy feedback'])
+        ->assertJsonFragment(['Talaba topshirig‘i tahlili']);
 });

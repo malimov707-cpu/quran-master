@@ -1,6 +1,12 @@
 <?php
 
 use App\Http\Controllers\Api\V1\AssignmentController;
+use App\Http\Controllers\Api\V1\RealtimeController;
+use App\Http\Controllers\Api\V1\VoiceController;
+use App\Http\Controllers\CertificateController;
+use App\Http\Controllers\LessonQuizController;
+use App\Http\Controllers\PasswordRecoveryController;
+use App\Http\Controllers\PrayerTimesController;
 use App\Http\Controllers\Web\AdministrationController;
 use App\Http\Controllers\Web\AssignmentManagementController;
 use App\Http\Controllers\Web\EducationController;
@@ -15,26 +21,58 @@ use App\Http\Controllers\Web\QuranAudioController;
 use App\Http\Controllers\Web\QuranController;
 use App\Http\Controllers\Web\ReviewStudioController;
 use App\Http\Controllers\Web\ScheduleController;
+use App\Http\Controllers\Web\StudentJourneyController;
+use App\Http\Controllers\Web\UserManagementController;
+use App\Http\Controllers\Web\VoiceChatController;
 use App\Http\Controllers\Web\WebAuthController as WebAuth;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/interface-locale', LocaleController::class)->name('interface.locale');
 
+Route::get('/namoz-vaqtlari', [PrayerTimesController::class, 'index'])->name('prayer-times');
+
+Route::get('/certificates/verify/{code}', [CertificateController::class, 'verify'])->whereUuid('code')->middleware('throttle:60,1')->name('certificates.verify');
+
 Route::get('/', fn () => redirect()->route('dashboard'));
 
 Route::middleware('guest')->group(function (): void {
+    Route::get('/forgot-password', [PasswordRecoveryController::class, 'forgot'])->name('password.request');
+    Route::post('/forgot-password', [PasswordRecoveryController::class, 'send'])->name('password.email')->middleware('throttle:password-recovery');
+    Route::get('/reset-password/{token}', [PasswordRecoveryController::class, 'edit'])->name('password.reset');
+    Route::post('/reset-password', [PasswordRecoveryController::class, 'update'])->name('password.update')->middleware('throttle:password-recovery');
+    Route::get('/register', [WebAuth::class, 'showRegister'])->name('register');
+    Route::post('/register', [WebAuth::class, 'register'])->middleware('throttle:registration');
     Route::get('/login', [WebAuth::class, 'showLogin'])->name('login');
-    Route::post('/login', [WebAuth::class, 'login'])->middleware('throttle:10,1');
+    Route::post('/login', [WebAuth::class, 'login'])->middleware('throttle:sign-in');
 });
 
-Route::middleware('auth')->group(function (): void {
+Route::middleware(['auth', 'active-account'])->group(function (): void {
+    Route::get('/administration/users/create', [UserManagementController::class, 'create'])->name('administration.users.create');
+    Route::post('/administration/users', [UserManagementController::class, 'store'])->name('administration.users.store');
+    Route::get('/administration/users/{user}/edit', [UserManagementController::class, 'edit'])->name('administration.users.edit');
+    Route::patch('/administration/users/{user}/roles', [UserManagementController::class, 'roles'])->name('administration.users.roles');
+    Route::put('/administration/users/{user}/children', [UserManagementController::class, 'children'])->name('administration.users.children');
+    Route::put('/administration/users/{user}/mentor-groups', [UserManagementController::class, 'mentorGroups'])->name('administration.users.mentor-groups');
     Route::get('/administration/{section}', [AdministrationController::class, 'index'])->name('administration');
     Route::post('/administration/ai/chat', [AdministrationController::class, 'chat'])->name('administration.ai.chat')->middleware('throttle:20,1');
     Route::patch('/administration/ai/users/{user}/premium', [AdministrationController::class, 'setAiPremium'])->name('administration.ai.premium');
     Route::get('/learning-path', [LearningPathController::class, 'index'])->name('learning.index');
     Route::post('/learning-path/cards', [LearningPathController::class, 'store'])->name('learning.store');
     Route::post('/learning-path/cards/{card}/review', [LearningPathController::class, 'review'])->whereNumber('card')->name('learning.review');
+    Route::post('/student/lessons/{lesson}/complete', [StudentJourneyController::class, 'lesson'])->name('student.lesson.complete');
+    Route::post('/student/assignments/{assignment}/practice', [StudentJourneyController::class, 'practice'])->name('student.practice.complete');
+    Route::post('/student/submissions/{submission}/feedback-read', [StudentJourneyController::class, 'feedback'])->name('student.feedback.read');
     Route::get('/dashboard', [WebAuth::class, 'dashboard'])->name('dashboard');
+    Route::get('/lessons/{lesson}/quiz/edit', [LessonQuizController::class, 'edit'])->name('lessons.quiz.edit');
+    Route::put('/lessons/{lesson}/quiz', [LessonQuizController::class, 'update'])->name('lessons.quiz.update');
+    Route::post('/lessons/{lesson}/quiz/attempts', [LessonQuizController::class, 'attempt'])->middleware('throttle:10,1')->name('lessons.quiz.attempt');
+    Route::get('/lessons/{lesson}/quiz', [LessonQuizController::class, 'show'])->name('lessons.quiz.show');
+    Route::get('/certificates', [CertificateController::class, 'index'])->name('certificates.index');
+    Route::get('/certificates/courses/{course}', [CertificateController::class, 'course'])->name('certificates.course');
+    Route::post('/certificates/courses/{course}', [CertificateController::class, 'claimCourse'])->middleware('throttle:15,1')->name('certificates.course.claim');
+    Route::post('/certificates/exams/{quiz}', [CertificateController::class, 'claimExam'])->middleware('throttle:15,1')->name('certificates.exam.claim');
+    Route::get('/certificates/{certificate}/download', [CertificateController::class, 'download'])->middleware('throttle:15,1')->name('certificates.download');
+    Route::post('/certificates/{certificate}/revoke', [CertificateController::class, 'revoke'])->middleware('throttle:15,1')->name('certificates.revoke');
     Route::get('/lessons', [LessonWebController::class, 'index'])->name('education.lessons');
     Route::post('/lessons', [LessonWebController::class, 'store'])->name('education.lessons.store');
     Route::get('/lessons/{lesson}', [LessonWebController::class, 'show'])->name('education.lessons.show');
@@ -88,5 +126,10 @@ Route::middleware('auth')->group(function (): void {
     // Mentor Review Studio
     Route::get('/mentor/submissions', [ReviewStudioController::class, 'index'])->name('mentor.submissions');
     Route::get('/mentor/review/{submission}', [ReviewStudioController::class, 'show'])->name('mentor.review-studio');
+
+    // AI ovozli ustoz (web session bilan ham ishlaydi — telefonda/JS uchun)
+    Route::get('/ai/voice', [VoiceChatController::class, 'index'])->name('ai.voice');
+    Route::post('/ai/voice', [VoiceController::class, 'store'])->middleware('throttle:10,1')->name('ai.voice.store');
+    Route::post('/ai/realtime/token', [RealtimeController::class, 'token'])->name('ai.realtime.token');
     Route::post('/mentor/review/{submission}', [MentorReviewWebController::class, 'store'])->name('mentor.review');
 });

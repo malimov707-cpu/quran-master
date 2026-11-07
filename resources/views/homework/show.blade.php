@@ -9,6 +9,9 @@
     @endif
     @if ($assignment->description)<p class="mt-4 whitespace-pre-line">{{ $assignment->description }}</p>@endif
     @if ($assignment->status === 'published')
+        <section class="glass-panel mt-5 p-5"><h2 class="font-semibold text-forest">{{ __('Avval mashq, keyin yozuv') }}</h2><p class="mt-2 text-sm text-graysoft">{{ __('Topshiriq ko‘rsatmalarini bajaring. Mashqni belgilash — o‘z qaydingiz, ustoz bahosi emas.') }}</p>@if ($practiced)<p class="mt-3 text-sm text-forest">✓ {{ __('Mashq bajarilgan deb belgilangan') }}</p>@else<form method="POST" action="{{ route('student.practice.complete', $assignment) }}" class="mt-4">@csrf<button type="submit" class="bookmark-button">{{ __('Mashq qildim, yozuvga tayyorman') }}</button></form>@endif</section>
+    @endif
+    @if ($assignment->status === 'published')
         <form method="POST" action="{{ route('homework.submit', $assignment) }}" enctype="multipart/form-data" class="mt-6 space-y-5 rounded-2xl bg-ivory p-6 ring-1 ring-black/5">
             @csrf
             <div>

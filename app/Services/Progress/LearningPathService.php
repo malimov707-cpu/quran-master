@@ -2,7 +2,6 @@
 
 namespace App\Services\Progress;
 
-use App\Models\Assignment;
 use App\Models\RepetitionCard;
 use App\Models\RepetitionReview;
 use App\Models\User;
@@ -24,10 +23,7 @@ class LearningPathService
         $cards = RepetitionCard::where('user_id', $user->id);
         $due = (clone $cards)->with('ayah.surah:id,number,name_uz')->where('due_at', '<=', now())->orderBy('due_at')->limit(20)->get();
         $upcoming = (clone $cards)->with('ayah.surah:id,number,name_uz')->where('due_at', '>', now())->orderBy('due_at')->limit(7)->get();
-        $assignments = Assignment::where('status', 'published')
-            ->whereHas('group.students', fn ($query) => $query->where('users.id', $user->id))
-            ->whereDoesntHave('submissions', fn ($query) => $query->where('student_id', $user->id)->whereIn('status', ['submitted', 'in_review', 'graded']))
-            ->with('group:id,name')->orderBy('due_at')->limit(5)->get();
+        $assignments = app(StudentJourneyService::class)->pendingAssignments($user)->take(5)->values();
         $mentorErrors = DB::table('mentor_review_segments as segments')
             ->join('mentor_reviews as reviews', 'reviews.id', '=', 'segments.mentor_review_id')
             ->join('submissions', 'submissions.id', '=', 'reviews.submission_id')

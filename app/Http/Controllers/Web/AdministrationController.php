@@ -7,6 +7,7 @@ use App\Models\Role;
 use App\Models\User;
 use App\Services\AI\Contracts\AIExplanationProvider;
 use App\Services\AI\Contracts\SpeechRecognitionProvider;
+use App\Services\AI\RoleAwareAiAssistant;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -47,7 +48,8 @@ class AdministrationController extends Controller
 
     public function chat(Request $request, AIExplanationProvider $provider): JsonResponse
     {
-        abort_unless($request->user()->hasRole('CEO', 'SUPER_ADMIN', 'CENTER_ADMIN', 'HEAD_TEACHER', 'MENTOR', 'PARENT'), 403);
+        $user = $request->user();
+        abort_unless(app(RoleAwareAiAssistant::class)->hasAccess($user), 403);
 
         $data = $request->validate([
             'message' => ['required', 'string', 'min:2', 'max:4000'],
@@ -61,10 +63,10 @@ class AdministrationController extends Controller
         }
 
         try {
-            $answer = $provider->explain($data['message'], [
-                'Rol: '.$request->user()->roles->pluck('label')->join(', '),
-                'Markaz boshqaruviga xizmat qiladigan xavfsiz va qisqa yordam ber.',
-            ]);
+            $answer = $provider->explain(
+                $data['message'],
+                app(RoleAwareAiAssistant::class)->contexts($user),
+            );
         } catch (\Throwable) {
             return response()->json([
                 'status' => 'unavailable',

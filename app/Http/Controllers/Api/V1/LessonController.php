@@ -4,10 +4,12 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Models\Lesson;
+use App\Services\Progress\StudentJourneyService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Http\Resources\Json\ResourceCollection;
+use Illuminate\Support\Facades\DB;
 
 class LessonController extends Controller
 {
@@ -32,7 +34,13 @@ class LessonController extends Controller
 
         abort_unless($lesson->status === 'published' || $request->user()->hasPermission('lessons.update'), 404);
 
-        return new JsonResource($lesson->load(['course:id,name', 'materials']));
+        $user = $request->user();
+        $canComplete = $user->hasRole('STUDENT') && $user->hasPermission('progress.view')
+            && app(StudentJourneyService::class)->eligibleLesson($user, $lesson);
+
+        return (new JsonResource($lesson->load(['course:id,name', 'materials'])))->additional([
+            'journey' => ['can_complete' => $canComplete, 'completed' => $canComplete && DB::table('lesson_completions')->where('user_id', $user->id)->where('lesson_id', $lesson->id)->exists()],
+        ]);
     }
 
     public function store(Request $request): JsonResponse

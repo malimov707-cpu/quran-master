@@ -1,12 +1,12 @@
 @php
     $icons = [
-        'dashboard' => 'home', 'education.courses' => 'book', 'education.lessons' => 'book',
+        'prayer-times' => 'calendar', 'dashboard' => 'home', 'education.courses' => 'book', 'education.lessons' => 'book',
         'education.groups' => 'users', 'education.schedules' => 'calendar', 'quran.surahs' => 'book',
         'assignments.manage' => 'check', 'homework.index' => 'book', 'mentor.submissions' => 'check',
-        'parents.dashboard' => 'users', 'notifications.index' => 'bell',
+        'parents.dashboard' => 'users', 'notifications.index' => 'bell', 'ai.voice' => 'mic',
     ];
     $groups = [
-        'Asosiy' => ['dashboard', 'quran.surahs'],
+        'Asosiy' => ['dashboard', 'quran.surahs', 'prayer-times', 'ai.voice'],
         'Boshqaruv' => ['education.courses', 'education.lessons', 'education.groups', 'education.schedules'],
         'O\'quv jarayoni' => ['assignments.manage', 'homework.index', 'mentor.submissions', 'parents.dashboard'],
         'Tizim' => ['notifications.index'],
@@ -39,3 +39,5 @@
 @if (auth()->user()->hasRole('STUDENT'))<a href="{{ route('learning.index') }}" class="nav-link {{ request()->routeIs('learning.*') ? 'is-active' : '' }}"><x-icon name="calendar"/><span class="nav-label">{{ __('Shaxsiy o‘quv rejam') }}</span></a>@endif
 
 <a href="{{ route('quran.audio') }}" class="nav-link {{ request()->routeIs('quran.audio') ? 'is-active' : '' }}"><x-icon name="book"/><span class="nav-label">{{ __('Audio kutubxona') }}</span></a>
+
+<a href="{{ route('certificates.index') }}" class="nav-link {{ request()->routeIs('certificates.*') ? 'is-active' : '' }}"><x-icon name="check"/><span class="nav-label">{{ __('Sertifikatlar') }}</span></a>

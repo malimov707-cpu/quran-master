@@ -17,17 +17,18 @@ class GroupService
      */
     public function addStudent(Group $group, User $student): void
     {
-        if ($group->capacity !== null && $group->students()->count() >= $group->capacity) {
-            abort(422, 'Guruh to\'lgan.');
-        }
-
-        if (! $student->hasRole('STUDENT')) {
-            abort(422, 'Foydalanuvchi o\'quvchi emas.');
-        }
-
-        $group->students()->syncWithoutDetaching([
-            $student->id => ['joined_at' => now()],
-        ]);
+        DB::transaction(function () use ($group, $student): void {
+            $locked = Group::whereKey($group->id)->lockForUpdate()->firstOrFail();
+            abort_unless($locked->status === 'active', 422, __('Guruh faol emas.'));
+            abort_unless($student->is_active && $student->hasRole('STUDENT'), 422, __('Faol o‘quvchi akkauntini tanlang.'));
+            if ($locked->students()->where('users.id', $student->id)->exists()) {
+                return;
+            }
+            if ($locked->capacity !== null && $locked->students()->count() >= $locked->capacity) {
+                abort(422, 'Guruh to‘lgan.');
+            }
+            DB::table('group_students')->updateOrInsert(['group_id' => $locked->id, 'student_id' => $student->id], ['joined_at' => now(), 'left_at' => null]);
+        });
     }
 
     /**

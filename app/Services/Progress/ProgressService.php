@@ -4,6 +4,7 @@ namespace App\Services\Progress;
 
 use App\Models\Submission;
 use App\Models\User;
+use App\Services\QuizService;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -58,6 +59,7 @@ class ProgressService
             ->values();
 
         return [
+            'quizzes' => app(QuizService::class)->progress($student),
             'submissions_total' => Submission::where('student_id', $student->id)->count(),
             'submissions_graded' => (clone $graded)->count(),
             'average_score' => $averageScore !== null ? round($averageScore, 1) : null,

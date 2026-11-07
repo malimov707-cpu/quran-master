@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -44,8 +45,13 @@ class AssignmentController extends Controller
         abort_unless($assignment->group->students()->where('users.id', $user->id)->exists(), 403);
         abort_unless($assignment->status === 'published', 404);
 
-        return response()->json($assignment->load(['group:id,name', 'submissions' => fn (HasMany $query): HasMany => $query
-            ->where('student_id', $user->id)->orderByDesc('attempt')]));
+        $assignment->load(['group:id,name,status', 'submissions' => fn (HasMany $query): HasMany => $query
+            ->where('student_id', $user->id)->orderByDesc('attempt')]);
+
+        return response()->json($assignment->toArray() + ['journey' => [
+            'can_practice' => $user->hasRole('STUDENT') && $user->hasPermission('progress.view') && $assignment->group->status === 'active',
+            'practiced' => DB::table('assignment_practices')->where('user_id', $user->id)->where('assignment_id', $assignment->id)->exists(),
+        ]]);
     }
 
     public function audio(Request $request, Submission $submission, SubmissionFile $file): BinaryFileResponse|StreamedResponse

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Services\RegistrationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -13,6 +14,13 @@ use Laravel\Sanctum\TransientToken;
 
 class AuthController extends Controller
 {
+    public function register(Request $request, RegistrationService $registration): JsonResponse
+    {
+        $user = $registration->register($request->all());
+
+        return $this->authenticatedResponse($user, $request->input('device_name') ?? 'mobile', 201);
+    }
+
     /**
      * Login — Bearer token qaytaradi (Web/Android/iOS uchun yagona).
      */
@@ -24,7 +32,7 @@ class AuthController extends Controller
             'device_name' => ['nullable', 'string', 'max:128'],
         ]);
 
-        $user = User::where('email', $data['email'])->first();
+        $user = User::whereRaw('LOWER(email) = ?', [mb_strtolower(trim($data['email']))])->first();
 
         if (! $user || ! Hash::check($data['password'], $user->password)) {
             throw ValidationException::withMessages([
@@ -38,7 +46,12 @@ class AuthController extends Controller
 
         $user->forceFill(['last_login_at' => now()])->save();
 
-        $token = $user->createToken($data['device_name'] ?? 'web')->plainTextToken;
+        return $this->authenticatedResponse($user, $data['device_name'] ?? 'web');
+    }
+
+    private function authenticatedResponse(User $user, string $deviceName, int $status = 200): JsonResponse
+    {
+        $token = $user->createToken($deviceName)->plainTextToken;
 
         return response()->json([
             'token' => $token,
@@ -50,7 +63,7 @@ class AuthController extends Controller
                 'roles' => $user->roles->pluck('name'),
                 'permissions' => $user->permissions()->values(),
             ],
-        ]);
+        ], $status);
     }
 
     /**
