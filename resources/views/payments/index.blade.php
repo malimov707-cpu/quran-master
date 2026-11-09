@@ -26,7 +26,7 @@
     <div class="mt-5 grid gap-4 xl:grid-cols-[1.5fr_1fr]">
         {{-- TAB 1: Oylik o'quv to'lovi --}}
         <section class="glass-panel p-6" aria-labelledby="tuition-heading">
-            <h2 id="tuition-heading" class="flex items-center gap-2 font-bold text-emerald-deep">📚 {{ __('Oylik o‘quv to‘lovi') }}</h2>
+            <h2 id="tuition-heading" class="flex items-center gap-3 font-bold text-emerald-deep"><x-icon3d variant="emerald" :size="38"><x-art3d name="mushaf"/></x-icon3d> {{ __('Oylik o‘quv to‘lovi') }}</h2>
 
             @if ($tuition)
                 <div class="mt-4 grid gap-3 sm:grid-cols-2">
@@ -68,7 +68,7 @@
 
         {{-- TAB 2: AI obuna --}}
         <section class="glass-panel p-6" aria-labelledby="ai-sub-heading">
-            <h2 id="ai-sub-heading" class="flex items-center gap-2 font-bold text-emerald-deep">🤖 {{ __('AI obunasi') }}</h2>
+            <h2 id="ai-sub-heading" class="flex items-center gap-3 font-bold text-emerald-deep"><x-icon3d variant="navy" :size="38"><x-art3d name="mic"/></x-icon3d> {{ __('AI obunasi') }}</h2>
 
             @if ($subscription)
                 <div class="mt-4 rounded-xl bg-cream p-4">

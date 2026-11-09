@@ -242,3 +242,29 @@ body.has-quran-audio .app-content { padding-bottom: 150px; }
 
 @media (max-width: 1023px) { .hero-banner { grid-template-columns: 1fr; padding: 26px 24px; } }
 @media (max-width: 767px) { .hero-banner { padding: 22px 18px; border-radius: 20px; } .hero-title { font-size: 24px; } .kpi-grid { gap: 10px; } .kpi-card { padding: 14px; gap: 10px; } .kpi-icon { width: 40px; height: 40px; font-size: 17px; } .kpi-value { font-size: 18px; } .ai-mentor-card::after { font-size: 64px; } }
+
+/* ================= 3D ICON SYSTEM ================= */
+.icon3d { position: relative; display: inline-flex; align-items: center; justify-content: center; border-radius: 18px; transform-style: preserve-3d; transition: transform .25s ease, box-shadow .25s ease; }
+.icon3d:hover { transform: translateY(-2px) rotateX(4deg); }
+.icon3d > svg, .icon3d > span { position: relative; z-index: 1; filter: drop-shadow(0 2px 1px rgba(0,0,0,.18)); }
+
+/* Variant: emerald */
+.icon3d-emerald { background: linear-gradient(145deg, #12b981 0%, #0b6246 55%, #06442f 100%); box-shadow: inset 0 2px 3px rgba(255,255,255,.35), inset 0 -4px 8px rgba(0,0,0,.35), 0 8px 14px -4px rgba(11,98,70,.5), 0 3px 5px rgba(0,0,0,.18); }
+/* Variant: gold */
+.icon3d-gold { background: linear-gradient(145deg, #f3d779 0%, #c9a227 55%, #8a6d14 100%); box-shadow: inset 0 2px 3px rgba(255,255,255,.5), inset 0 -4px 8px rgba(0,0,0,.3), 0 8px 14px -4px rgba(201,162,39,.45), 0 3px 5px rgba(0,0,0,.15); }
+/* Variant: navy */
+.icon3d-navy { background: linear-gradient(145deg, #3f6f8e 0%, #1d3a52 55%, #122738 100%); box-shadow: inset 0 2px 3px rgba(255,255,255,.25), inset 0 -4px 8px rgba(0,0,0,.4), 0 8px 14px -4px rgba(29,58,82,.5), 0 3px 5px rgba(0,0,0,.18); }
+/* Variant: ivory / soft */
+.icon3d-ivory { background: linear-gradient(145deg, #ffffff 0%, #efe7d6 60%, #ddcfb2 100%); box-shadow: inset 0 2px 3px rgba(255,255,255,.9), inset 0 -4px 8px rgba(0,0,0,.08), 0 8px 14px -4px rgba(120,100,60,.25); color: #0b6246; }
+
+/* Floating keyframes for hero icons */
+@keyframes icon3d-float { 0%,100% { transform: translateY(0) } 50% { transform: translateY(-5px) } }
+.icon3d-float { animation: icon3d-float 4.5s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) { .icon3d-float { animation: none; } }
+
+/* Apply to existing slots */
+.kpi-icon.icon3d, .metric-icon.icon3d, .hero-goal-icon.icon3d { border-radius: 16px; }
+.metric-icon.icon3d { width: 36px; height: 36px; font-size: 16px; }
+.hero-goal-icon.icon3d { width: 36px; height: 36px; font-size: 16px; }
+.kpi-icon.icon3d { width: 48px; height: 48px; font-size: 20px; }
+[data-theme=dark] .icon3d-ivory { color: #0b6246; }

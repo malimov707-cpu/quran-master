@@ -17,7 +17,7 @@
         </div>
         <aside class="hero-goal glass-panel" aria-label="{{ __('Kunlik maqsad') }}">
             <div class="hero-goal-head">
-                <span class="hero-goal-icon" aria-hidden="true">◎</span>
+                <x-icon3d variant="emerald" :size="36" class="hero-goal-icon icon3d"><x-art3d name="rocket"/></x-icon3d>
                 <strong>{{ __('Kunlik maqsad') }}</strong>
             </div>
             @if ($user->hasRole('STUDENT'))
@@ -40,19 +40,19 @@
     @if ($user->hasRole('STUDENT') && $studentKpis)
         <section class="kpi-grid" aria-label="{{ __('Mening ko‘rsatkichlarim') }}">
             <article class="kpi-card glass-panel">
-                <span class="kpi-icon kpi-gold" aria-hidden="true">📖</span>
+                <x-icon3d variant="gold" :size="48"><x-art3d name="mushaf"/></x-icon3d>
                 <div><p class="kpi-label">{{ __("O'qilgan oyatlar") }}</p><p class="kpi-value">{{ number_format($studentKpis['ayahs']) }}</p></div>
             </article>
             <article class="kpi-card glass-panel">
-                <span class="kpi-icon kpi-green" aria-hidden="true">🕐</span>
+                <x-icon3d variant="emerald" :size="48"><x-art3d name="clock"/></x-icon3d>
                 <div><p class="kpi-label">{{ __('Bugungi vaqt') }}</p><p class="kpi-value">{{ number_format($studentKpis['minutes'], 0) }} {{ __('daq') }}</p></div>
             </article>
             <article class="kpi-card glass-panel">
-                <span class="kpi-icon kpi-fire" aria-hidden="true">🔥</span>
+                <x-icon3d variant="gold" :size="48" float><x-art3d name="moon"/></x-icon3d>
                 <div><p class="kpi-label">{{ __('Ketma-ket kun') }}</p><p class="kpi-value">{{ $studentKpis['streak'] }} {{ __('kun') }}</p></div>
             </article>
             <article class="kpi-card glass-panel">
-                <span class="kpi-icon kpi-trophy" aria-hidden="true">🏆</span>
+                <x-icon3d variant="navy" :size="48"><x-art3d name="trophy"/></x-icon3d>
                 <div><p class="kpi-label">{{ __('Yutuqlar') }}</p><p class="kpi-value">{{ $studentKpis['achievements'] }} ta</p></div>
             </article>
         </section>
@@ -119,7 +119,7 @@
                         <div class="mt-4 space-y-3">
                             @foreach ($studentCourses as $course)
                                 <a href="{{ route('education.lessons') }}" class="course-progress-row">
-                                    <span class="avatar avatar-sq" aria-hidden="true">📖</span>
+                                    <x-icon3d variant="emerald" :size="44" class="shrink-0"><x-art3d name="mushaf"/></x-icon3d>
                                     <span class="min-w-0 flex-1">
                                         <strong class="block truncate text-sm">{{ $course->name }}</strong>
                                         <span class="course-progress-bar"><span style="width: {{ $course->progress_pct }}%"></span></span>

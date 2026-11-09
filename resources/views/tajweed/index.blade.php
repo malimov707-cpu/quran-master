@@ -20,7 +20,7 @@
                         <p class="text-[10px] font-bold uppercase tracking-widest text-gold">{{ $rule->code }}</p>
                         <h2 class="mt-1 text-lg font-extrabold text-emerald-deep">{{ $rule->name_uz }}</h2>
                     </div>
-                    <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-cream text-lg">◎</span>
+                    <x-icon3d variant="gold" :size="40"><x-art3d name="mushaf"/></x-icon3d>
                 </div>
                 <p class="mt-3 line-clamp-3 text-sm text-graysoft">{{ $rule->description }}</p>
                 <span class="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-forest">{{ __('Batafsil o‘rganish') }} <span aria-hidden="true">→</span></span>
