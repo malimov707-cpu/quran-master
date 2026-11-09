@@ -20,14 +20,27 @@ test('ceo sees all ai capabilities without requiring premium', function () {
         ->assertJsonFragment(['Premium va AI boshqaruvi']);
 });
 
-test('student ai is blocked without premium or high score', function () {
+test('student ai works within free daily limit, then asks for premium', function () {
     config()->set('services.openrouter.key', 'test-key');
+    config()->set('ai.free_daily_limit', 2);
     $student = User::where('email', 'oquvchi@markaz.uz')->firstOrFail();
 
+    Http::fake(['openrouter.ai/*' => Http::response(['choices' => [['message' => ['content' => 'Ikhfa — nogizor harf qoidasi.']]]])]);
+
     $this->actingAs($student, 'sanctum')
-        ->postJson('/api/v1/ai/chat', ['question' => 'Tajvidni tushuntir'])
-        ->assertStatus(402)
-        ->assertJsonPath('status', 'premium_required');
+        ->postJson('/api/v1/ai/chat', ['question' => 'Birinchi savol'])
+        ->assertOk()
+        ->assertJsonPath('status', 'completed');
+
+    $this->actingAs($student, 'sanctum')
+        ->postJson('/api/v1/ai/chat', ['question' => 'Ikkinchi savol'])
+        ->assertOk();
+
+    // Limit tugadi — 429
+    $this->actingAs($student, 'sanctum')
+        ->postJson('/api/v1/ai/chat', ['question' => 'Uchinchi savol'])
+        ->assertStatus(429)
+        ->assertJsonPath('status', 'daily_limit_reached');
 });
 
 test('admins can enable student premium access', function () {

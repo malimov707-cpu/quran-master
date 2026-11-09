@@ -8,6 +8,7 @@
         <a href="{{ $canUpdate ? route('lessons.quiz.edit', $lesson) : route('lessons.quiz.show', $lesson) }}" class="mt-5 inline-block rounded-xl bg-forest px-5 py-3 font-semibold text-white">{{ $canUpdate ? __('Dars testini boshqarish') : __('Dars oxiridagi test') }} →</a>
     @endif
     <div class="mt-6 space-y-6">
+        @include('education.lesson-videos')
         @if ($lesson->learning_objectives)<section class="rounded-2xl bg-white p-6 ring-1 ring-black/5"><h2 class="font-semibold text-forest">{{ __('O‘quv maqsadi') }}</h2><p class="mt-3 whitespace-pre-line">{{ $lesson->learning_objectives }}</p></section>@endif
         <section class="rounded-2xl bg-white p-6 ring-1 ring-black/5"><h2 class="font-semibold text-forest">{{ __('Dars mazmuni') }}</h2><p class="mt-3 leading-8 whitespace-pre-line">{{ $lesson->description ?? 'Dars mazmuni hali kiritilmagan.' }}</p></section>
         @if ($lesson->homework)<section class="rounded-2xl bg-cream p-6 ring-1 ring-black/5"><h2 class="font-semibold text-forest">{{ __('Mustaqil mashq') }}</h2><p class="mt-3 whitespace-pre-line">{{ $lesson->homework }}</p></section>@endif

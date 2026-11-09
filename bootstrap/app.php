@@ -4,6 +4,7 @@ use App\Http\Middleware\EnsureActiveAccount;
 use App\Http\Middleware\EnsureAdministration;
 use App\Http\Middleware\EnsureUserHasPermission;
 use App\Http\Middleware\SetInterfaceLocale;
+use App\Http\Middleware\VerifyPaymeAuth;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -22,6 +23,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'permission' => EnsureUserHasPermission::class,
             'active-account' => EnsureActiveAccount::class,
             'administration' => EnsureAdministration::class,
+            'payme.auth' => VerifyPaymeAuth::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

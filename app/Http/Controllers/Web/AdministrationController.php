@@ -3,11 +3,14 @@
 namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
+use App\Models\FeeItem;
+use App\Models\Payment;
 use App\Models\Role;
 use App\Models\User;
 use App\Services\AI\Contracts\AIExplanationProvider;
 use App\Services\AI\Contracts\SpeechRecognitionProvider;
 use App\Services\AI\RoleAwareAiAssistant;
+use App\Services\Payments\PaymentService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -43,7 +46,20 @@ class AdministrationController extends Controller
         $premiumUsers = $section === 'ai' ? User::with('roles:id,name,label')->where('ai_premium', true)->orderBy('name')->get() : collect();
         $studentUsers = $section === 'ai' ? User::whereHas('roles', fn ($query) => $query->where('name', 'STUDENT'))->orderBy('name')->get() : collect();
 
-        return view('administration.index', compact('section', 'users', 'roles', 'logs', 'filters', 'speechConfigured', 'aiConfigured', 'aiModel', 'premiumUsers', 'studentUsers') + ['pageTitle' => $titles[$section]]);
+        $paymentsSummary = $section === 'payments' ? app(PaymentService::class)->monthlySummary() : null;
+        $paymentsList = $section === 'payments' ? Payment::with(['user:id,name,email', 'plan:id,name'])->latest()->limit(30)->get() : collect();
+
+        // Oylik o'quv to'lovlari (tuition) — jadval + statistika + qarzdorlar
+        $fees = $section === 'payments' ? FeeItem::with(['student:id,name,email', 'group:id,name', 'course:id,name'])
+            ->orderByDesc('year')->orderByDesc('month')->orderBy('status')->paginate(15)->withQueryString() : null;
+        $feesStats = $section === 'payments' ? [
+            'paid_som' => (int) round((FeeItem::where('status', 'paid')->sum('paid_amount_tiyin')) / 100),
+            'pending_count' => (int) FeeItem::whereIn('status', ['pending', 'partial'])->count(),
+            'pending_som' => (int) round((FeeItem::whereIn('status', ['pending', 'partial'])->selectRaw('coalesce(sum(amount_tiyin - paid_amount_tiyin),0) as due')->value('due')) / 100),
+            'overdue_count' => (int) FeeItem::whereIn('status', ['pending', 'partial'])->whereNotNull('due_date')->where('due_date', '<', now())->count(),
+        ] : null;
+
+        return view('administration.index', compact('section', 'users', 'roles', 'logs', 'filters', 'speechConfigured', 'aiConfigured', 'aiModel', 'premiumUsers', 'studentUsers', 'paymentsSummary', 'paymentsList', 'fees', 'feesStats') + ['pageTitle' => $titles[$section]]);
     }
 
     public function chat(Request $request, AIExplanationProvider $provider): JsonResponse

@@ -9,8 +9,28 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Group extends Model
 {
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'monthly_fee_tiyin' => 'integer',
+            'payment_due_day' => 'integer',
+            'capacity' => 'integer',
+        ];
+    }
+
+    /**
+     * Oylik to'lov so'mda.
+     */
+    public function getMonthlyFeeSomAttribute(): int
+    {
+        return (int) round($this->monthly_fee_tiyin / 100);
+    }
+
     /** @var list<string> */
-    protected $fillable = ['name', 'course_id', 'teacher_id', 'mentor_id', 'capacity', 'status'];
+    protected $fillable = ['name', 'course_id', 'teacher_id', 'mentor_id', 'capacity', 'status', 'monthly_fee_tiyin', 'payment_due_day'];
 
     /**
      * Kurs.

@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\V1\RealtimeController;
 use App\Http\Controllers\Api\V1\VoiceController;
 use App\Http\Controllers\CertificateController;
 use App\Http\Controllers\LessonQuizController;
+use App\Http\Controllers\LessonVideoController;
 use App\Http\Controllers\PasswordRecoveryController;
 use App\Http\Controllers\PrayerTimesController;
 use App\Http\Controllers\Web\AdministrationController;
@@ -17,11 +18,15 @@ use App\Http\Controllers\Web\LocaleController;
 use App\Http\Controllers\Web\MentorReviewWebController;
 use App\Http\Controllers\Web\NotificationWebController;
 use App\Http\Controllers\Web\ParentDashboardController;
+use App\Http\Controllers\Web\PaymentsAdminController;
+use App\Http\Controllers\Web\PaymentsController;
 use App\Http\Controllers\Web\QuranAudioController;
 use App\Http\Controllers\Web\QuranController;
 use App\Http\Controllers\Web\ReviewStudioController;
 use App\Http\Controllers\Web\ScheduleController;
 use App\Http\Controllers\Web\StudentJourneyController;
+use App\Http\Controllers\Web\SubscriptionController;
+use App\Http\Controllers\Web\TajweedController;
 use App\Http\Controllers\Web\UserManagementController;
 use App\Http\Controllers\Web\VoiceChatController;
 use App\Http\Controllers\Web\WebAuthController as WebAuth;
@@ -32,6 +37,8 @@ Route::post('/interface-locale', LocaleController::class)->name('interface.local
 Route::get('/namoz-vaqtlari', [PrayerTimesController::class, 'index'])->name('prayer-times');
 
 Route::get('/certificates/verify/{code}', [CertificateController::class, 'verify'])->whereUuid('code')->middleware('throttle:60,1')->name('certificates.verify');
+
+Route::get('/lesson-video/{material}/{user}', [LessonVideoController::class, 'stream'])->middleware('signed:relative')->name('lesson-video.stream');
 
 Route::get('/', fn () => redirect()->route('dashboard'));
 
@@ -54,6 +61,9 @@ Route::middleware(['auth', 'active-account'])->group(function (): void {
     Route::put('/administration/users/{user}/children', [UserManagementController::class, 'children'])->name('administration.users.children');
     Route::put('/administration/users/{user}/mentor-groups', [UserManagementController::class, 'mentorGroups'])->name('administration.users.mentor-groups');
     Route::get('/administration/{section}', [AdministrationController::class, 'index'])->name('administration');
+    Route::post('/administration/payments/generate-invoices', [PaymentsAdminController::class, 'generateInvoices'])->name('administration.payments.generate');
+    Route::post('/administration/payments/{fee}/receive', [PaymentsAdminController::class, 'receive'])->name('administration.payments.receive');
+    Route::post('/administration/payments/{fee}/remind', [PaymentsAdminController::class, 'remind'])->name('administration.payments.remind');
     Route::post('/administration/ai/chat', [AdministrationController::class, 'chat'])->name('administration.ai.chat')->middleware('throttle:20,1');
     Route::patch('/administration/ai/users/{user}/premium', [AdministrationController::class, 'setAiPremium'])->name('administration.ai.premium');
     Route::get('/learning-path', [LearningPathController::class, 'index'])->name('learning.index');
@@ -73,6 +83,14 @@ Route::middleware(['auth', 'active-account'])->group(function (): void {
     Route::post('/certificates/exams/{quiz}', [CertificateController::class, 'claimExam'])->middleware('throttle:15,1')->name('certificates.exam.claim');
     Route::get('/certificates/{certificate}/download', [CertificateController::class, 'download'])->middleware('throttle:15,1')->name('certificates.download');
     Route::post('/certificates/{certificate}/revoke', [CertificateController::class, 'revoke'])->middleware('throttle:15,1')->name('certificates.revoke');
+    Route::get('/lessons/{lesson}/videos', [LessonVideoController::class, 'index']);
+    Route::post('/lessons/{lesson}/videos/youtube', [LessonVideoController::class, 'youtube'])->middleware('throttle:15,1');
+    Route::post('/lessons/{lesson}/video-uploads', [LessonVideoController::class, 'beginUpload'])->middleware('throttle:15,1');
+    Route::post('/video-uploads/{upload}/chunks', [LessonVideoController::class, 'chunk'])->middleware('throttle:600,1');
+    Route::post('/video-uploads/{upload}/finish', [LessonVideoController::class, 'finishUpload'])->middleware('throttle:15,1');
+    Route::delete('/video-uploads/{upload}', [LessonVideoController::class, 'cancelUpload'])->middleware('throttle:30,1');
+    Route::delete('/videos/{material}', [LessonVideoController::class, 'destroy'])->middleware('throttle:30,1');
+    Route::post('/videos/{material}/progress', [LessonVideoController::class, 'progress'])->middleware('throttle:120,1');
     Route::get('/lessons', [LessonWebController::class, 'index'])->name('education.lessons');
     Route::post('/lessons', [LessonWebController::class, 'store'])->name('education.lessons.store');
     Route::get('/lessons/{lesson}', [LessonWebController::class, 'show'])->name('education.lessons.show');
@@ -129,6 +147,15 @@ Route::middleware(['auth', 'active-account'])->group(function (): void {
 
     // AI ovozli ustoz (web session bilan ham ishlaydi — telefonda/JS uchun)
     Route::get('/ai/voice', [VoiceChatController::class, 'index'])->name('ai.voice');
+
+    // Tajvid akademiyasi
+    Route::get('/payments', [PaymentsController::class, 'index'])->name('payments.index');
+    Route::post('/payments/{fee}/remind', [PaymentsController::class, 'remind'])->name('payments.remind');
+    Route::get('/subscriptions', [SubscriptionController::class, 'index'])->name('subscriptions.index');
+    Route::post('/subscriptions/cash', [SubscriptionController::class, 'requestCash'])->name('subscriptions.cash');
+
+    Route::get('/tajweed', [TajweedController::class, 'index'])->name('tajweed.index');
+    Route::get('/tajweed/{rule}', [TajweedController::class, 'show'])->name('tajweed.show');
     Route::post('/ai/voice', [VoiceController::class, 'store'])->middleware('throttle:10,1')->name('ai.voice.store');
     Route::post('/ai/realtime/token', [RealtimeController::class, 'token'])->name('ai.realtime.token');
     Route::post('/mentor/review/{submission}', [MentorReviewWebController::class, 'store'])->name('mentor.review');

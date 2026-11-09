@@ -9,6 +9,7 @@ use App\Models\Lesson;
 use App\Models\Submission;
 use App\Models\User;
 use App\Services\DashboardService;
+use App\Services\Progress\ProgressService;
 use App\Services\Progress\StudentJourneyService;
 use App\Services\QuizService;
 use App\Services\RegistrationService;
@@ -144,9 +145,14 @@ class WebAuthController extends BaseController
 
         $studentJourney = ! $isAdministration && $user->hasRole('STUDENT') && $can('progress.view') ? app(StudentJourneyService::class)->overview($user) : null;
 
+        $videoProgress = $studentJourney ? app(ProgressService::class)->videoStats($user) : null;
         $quizProgress = $studentJourney ? app(QuizService::class)->progress($user) : null;
 
-        return view('dashboard', compact('cards', 'user', 'isAdministration', 'newUsers', 'registrationChart', 'studentJourney', 'quizProgress') + $dashboard->forUser($user, $days));
+        // Student premium dashboard ko'rsatkichlari — real DB ma'lumotlari
+        $studentKpis = $user->hasRole('STUDENT') ? $dashboard->studentKpis($user, 30) : null;
+        $studentCourses = $user->hasRole('STUDENT') ? $dashboard->studentCourses($user) : collect();
+
+        return view('dashboard', compact('cards', 'user', 'isAdministration', 'newUsers', 'registrationChart', 'studentJourney', 'quizProgress', 'videoProgress', 'studentKpis', 'studentCourses') + $dashboard->forUser($user, $days));
     }
 
     public function logout(Request $request): RedirectResponse

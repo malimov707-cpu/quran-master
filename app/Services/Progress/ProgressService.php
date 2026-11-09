@@ -13,6 +13,15 @@ use Illuminate\Support\Facades\DB;
  */
 class ProgressService
 {
+    /** @return array{started: int, completed: int, watched_seconds: int} */
+    public function videoStats(User $student): array
+    {
+        $stats = DB::table('video_progress')->where('user_id', $student->id)
+            ->selectRaw('COUNT(*) as started, SUM(CASE WHEN completed THEN 1 ELSE 0 END) as completed, SUM(watched_seconds) as watched_seconds')->first();
+
+        return ['started' => (int) $stats->started, 'completed' => (int) $stats->completed, 'watched_seconds' => (int) $stats->watched_seconds];
+    }
+
     /**
      * O'quvchi uchun to'liq progress ko'rinishi.
      *
@@ -59,6 +68,7 @@ class ProgressService
             ->values();
 
         return [
+            'videos' => $this->videoStats($student),
             'quizzes' => app(QuizService::class)->progress($student),
             'submissions_total' => Submission::where('student_id', $student->id)->count(),
             'submissions_graded' => (clone $graded)->count(),

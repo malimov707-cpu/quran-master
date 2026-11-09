@@ -4,21 +4,28 @@ use App\Http\Controllers\Api\V1\AdministrationController;
 use App\Http\Controllers\Api\V1\AiController;
 use App\Http\Controllers\Api\V1\AssignmentController;
 use App\Http\Controllers\Api\V1\AuthController;
+use App\Http\Controllers\Api\V1\ClickController;
 use App\Http\Controllers\Api\V1\CourseController;
 use App\Http\Controllers\Api\V1\GroupController;
 use App\Http\Controllers\Api\V1\LearningPathController;
 use App\Http\Controllers\Api\V1\LessonController;
 use App\Http\Controllers\Api\V1\NotificationController;
 use App\Http\Controllers\Api\V1\ParentController;
+use App\Http\Controllers\Api\V1\PaymeController;
 use App\Http\Controllers\Api\V1\ProgressController;
 use App\Http\Controllers\Api\V1\QuranAudioController;
 use App\Http\Controllers\Api\V1\QuranController;
+use App\Http\Controllers\Api\V1\ReadingController;
 use App\Http\Controllers\Api\V1\RealtimeController;
 use App\Http\Controllers\Api\V1\ScheduleController;
 use App\Http\Controllers\Api\V1\StudentJourneyController;
+use App\Http\Controllers\Api\V1\StudentKpiController;
+use App\Http\Controllers\Api\V1\SubscriptionController;
+use App\Http\Controllers\Api\V1\TajweedController;
 use App\Http\Controllers\Api\V1\VoiceController;
 use App\Http\Controllers\CertificateController;
 use App\Http\Controllers\LessonQuizController;
+use App\Http\Controllers\LessonVideoController;
 use App\Http\Controllers\PasswordRecoveryController;
 use App\Http\Controllers\PrayerTimesController;
 use App\Http\Controllers\Web\LessonWebController;
@@ -28,6 +35,10 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function (): void {
+    // To'lov provayder webhooklari (guest, o'z auth mexanizmi bilan)
+    Route::post('payments/payme', [PaymeController::class, 'handle'])->middleware('payme.auth');
+    Route::post('payments/click', [ClickController::class, 'handle']);
+
     Route::get('prayer-times', [PrayerTimesController::class, 'data'])->name('api.prayer-times');
     Route::get('health', function () {
         try {
@@ -73,6 +84,7 @@ Route::prefix('v1')->group(function (): void {
         Route::post('auth/logout', [AuthController::class, 'logout']);
 
         Route::get('student/journey', [StudentJourneyController::class, 'index']);
+        Route::get('student/kpis', [StudentKpiController::class, 'index']);
         Route::post('student/lessons/{lesson}/complete', [StudentJourneyController::class, 'lesson']);
         Route::post('student/assignments/{assignment}/practice', [StudentJourneyController::class, 'practice']);
         Route::post('student/submissions/{submission}/feedback-read', [StudentJourneyController::class, 'feedback']);
@@ -102,6 +114,14 @@ Route::prefix('v1')->group(function (): void {
         Route::post('certificates/exams/{quiz}', [CertificateController::class, 'claimExam'])->middleware('throttle:15,1');
         Route::get('certificates/{certificate}/download', [CertificateController::class, 'download'])->middleware('throttle:15,1');
         Route::post('certificates/{certificate}/revoke', [CertificateController::class, 'revoke'])->middleware('throttle:15,1');
+        Route::get('lessons/{lesson}/videos', [LessonVideoController::class, 'index']);
+        Route::post('lessons/{lesson}/videos/youtube', [LessonVideoController::class, 'youtube'])->middleware('throttle:15,1');
+        Route::post('lessons/{lesson}/video-uploads', [LessonVideoController::class, 'beginUpload'])->middleware('throttle:15,1');
+        Route::post('video-uploads/{upload}/chunks', [LessonVideoController::class, 'chunk'])->middleware('throttle:600,1');
+        Route::post('video-uploads/{upload}/finish', [LessonVideoController::class, 'finishUpload'])->middleware('throttle:15,1');
+        Route::delete('video-uploads/{upload}', [LessonVideoController::class, 'cancelUpload'])->middleware('throttle:30,1');
+        Route::delete('videos/{material}', [LessonVideoController::class, 'destroy'])->middleware('throttle:30,1');
+        Route::post('videos/{material}/progress', [LessonVideoController::class, 'progress'])->middleware('throttle:120,1');
         Route::get('lessons', [LessonController::class, 'index']);
         Route::post('lessons', [LessonController::class, 'store']);
         Route::get('lessons/{lesson}', [LessonController::class, 'show']);
@@ -113,6 +133,22 @@ Route::prefix('v1')->group(function (): void {
         Route::delete('quran/audio/lists/{list}', [QuranAudioController::class, 'destroyList'])->whereNumber('list');
         Route::get('quran/audio', [QuranAudioController::class, 'index']);
         Route::get('quran/audio/{edition}/{surah}', [QuranAudioController::class, 'playlist']);
+
+        // Obuna va to'lovlar
+        Route::get('subscriptions', [SubscriptionController::class, 'index']);
+        Route::post('subscriptions/cash', [SubscriptionController::class, 'subscribeCash']);
+
+        // Tajvid akademiyasi
+        Route::get('tajweed', [TajweedController::class, 'index']);
+        Route::get('tajweed/{rule}', [TajweedController::class, 'show']);
+
+        // O'qish holati: bookmark, oxirgi joy, tinglash tarixi (web+mobile sinxron)
+        Route::post('reading/bookmarks/toggle', [ReadingController::class, 'toggleBookmark']);
+        Route::get('reading/bookmarks', [ReadingController::class, 'bookmarks']);
+        Route::post('reading/position', [ReadingController::class, 'savePosition']);
+        Route::get('reading/position', [ReadingController::class, 'position']);
+        Route::post('reading/playback', [ReadingController::class, 'logPlayback'])->middleware('throttle:60,1');
+        Route::get('reading/stats', [ReadingController::class, 'listeningStats']);
         Route::put('quran/audio/preferences', [QuranAudioController::class, 'preferences']);
         Route::post('quran/audio/history', [QuranAudioController::class, 'history'])->middleware('throttle:60,1');
         Route::post('quran/audio/favorites/{edition}', [QuranAudioController::class, 'favorite']);

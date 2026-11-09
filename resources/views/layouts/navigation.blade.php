@@ -3,12 +3,12 @@
         'prayer-times' => 'calendar', 'dashboard' => 'home', 'education.courses' => 'book', 'education.lessons' => 'book',
         'education.groups' => 'users', 'education.schedules' => 'calendar', 'quran.surahs' => 'book',
         'assignments.manage' => 'check', 'homework.index' => 'book', 'mentor.submissions' => 'check',
-        'parents.dashboard' => 'users', 'notifications.index' => 'bell', 'ai.voice' => 'mic',
+        'parents.dashboard' => 'users', 'notifications.index' => 'bell', 'ai.voice' => 'mic', 'payments.index' => 'credit-card',
     ];
     $groups = [
         'Asosiy' => ['dashboard', 'quran.surahs', 'prayer-times', 'ai.voice'],
         'Boshqaruv' => ['education.courses', 'education.lessons', 'education.groups', 'education.schedules'],
-        'O\'quv jarayoni' => ['assignments.manage', 'homework.index', 'mentor.submissions', 'parents.dashboard'],
+        'O\'quv jarayoni' => ['assignments.manage', 'homework.index', 'mentor.submissions', 'parents.dashboard', 'payments.index'],
         'Tizim' => ['notifications.index'],
     ];
 @endphp

@@ -63,13 +63,23 @@ class AppServiceProvider extends ServiceProvider
                 ['route' => 'education.schedules', 'label' => 'Jadval va davomat', 'permission' => 'schedules.view'],
                 ['route' => 'quran.surahs', 'label' => 'Qur’on', 'permission' => null],
                 ['route' => 'ai.voice', 'label' => 'AI Ustoz (ovozli)', 'permission' => null],
+                ['route' => 'tajweed.index', 'label' => 'Tajvid akademiyasi', 'permission' => null],
                 ['route' => 'assignments.manage', 'label' => 'Topshiriqlar boshqaruvi', 'permission' => 'assignments.manage'],
                 ['route' => 'homework.index', 'label' => 'Uy vazifalarim', 'permission' => 'submissions.create'],
                 ['route' => 'mentor.submissions', 'label' => 'Mentor tekshiruvi', 'permission' => 'submissions.review'],
                 ['route' => 'parents.dashboard', 'label' => 'Farzandlarim', 'permission' => 'children.view'],
+                ['route' => 'payments.index', 'label' => 'To‘lovlar', 'permission' => 'submissions.create|children.view'],
                 ['route' => 'notifications.index', 'label' => 'Bildirishnomalar', 'permission' => null],
             ];
-            $view->with('navigation', array_filter($navigation, fn (array $item): bool => ($item['permission'] === null || $permissions->contains($item['permission'])) && (! $isAdministration || ! in_array($item['route'], ['homework.index', 'mentor.submissions', 'parents.dashboard'], true))));
+            $view->with('navigation', array_filter($navigation, function (array $item) use ($permissions, $isAdministration): bool {
+                // 'a|b' sintaksisi: kamida bittasi yetarli (OR)
+                $allowed = $item['permission'] === null || collect(explode('|', $item['permission']))->contains(fn ($permission): bool => $permissions->contains($permission));
+                if (! $allowed) {
+                    return false;
+                }
+
+                return ! $isAdministration || ! in_array($item['route'], ['homework.index', 'mentor.submissions', 'parents.dashboard'], true);
+            }));
         });
     }
 }

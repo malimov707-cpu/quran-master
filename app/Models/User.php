@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Collection;
@@ -111,6 +112,40 @@ class User extends Authenticatable
         }
 
         return collect($ownedRoles)->intersect($roles)->isNotEmpty();
+    }
+
+    /** @return HasMany<QuranBookmark, $this> */
+    public function quranBookmarks(): HasMany
+    {
+        return $this->hasMany(QuranBookmark::class);
+    }
+
+    /** @return HasOne<ReadingPosition, $this> */
+    public function readingPosition(): HasOne
+    {
+        return $this->hasOne(ReadingPosition::class);
+    }
+
+    /** @return HasMany<Payment, $this> */
+    public function payments(): HasMany
+    {
+        return $this->hasMany(Payment::class);
+    }
+
+    /** @return HasMany<Subscription, $this> */
+    public function subscriptions(): HasMany
+    {
+        return $this->hasMany(Subscription::class);
+    }
+
+    /** Joriy faol obuna (eng so'nggi muddatli). */
+    public function activeSubscription(): ?Subscription
+    {
+        return $this->hasOne(Subscription::class)
+            ->where('status', 'active')
+            ->where('expires_at', '>', now())
+            ->orderByDesc('expires_at')
+            ->first();
     }
 
     /**

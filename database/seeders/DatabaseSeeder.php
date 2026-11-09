@@ -77,7 +77,13 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         if (! app()->environment('testing')) {
+            $this->call(TajweedRuleSeeder::class);
             $this->call(QuranDataSeeder::class);
+            $this->call(SubscriptionPlanSeeder::class);
+        } else {
+            // Testlarda ham tajvid qoidalari va rejalari kerak
+            $this->call(TajweedRuleSeeder::class);
+            $this->call(SubscriptionPlanSeeder::class);
         }
 
         // Rollar

@@ -86,7 +86,111 @@
             })();
         </script>
     @elseif ($section === 'payments')
-        <section class="glass-panel mx-auto max-w-2xl p-10 text-center"><x-icon name="grid" class="mx-auto mb-5 h-10 w-10 text-gold"/><h2 class="text-xl font-semibold text-forest">{{ __('To‘lov xizmati hali ulanmagan') }}</h2><p class="mt-3 text-sm text-graysoft">{{ __('Loyihada hisob-kitob va to‘lov ma’lumotlari mavjud emas. Integratsiya ulangach, tranzaksiyalar shu yerda ko‘rinadi.') }}</p></section>
+        {{-- Moliyaviy xulosa --}}
+        <section class="glass-panel p-6" aria-labelledby="payments-summary">
+            <h2 id="payments-summary" class="font-bold text-forest">{{ __('Moliyaviy holat') }}</h2>
+            <div class="mt-5 grid gap-4 sm:grid-cols-3">
+                <div class="rounded-xl bg-cream p-5 text-center">
+                    <p class="text-2xl font-extrabold text-emerald-deep">{{ number_format($paymentsSummary['this_month_som']) }}</p>
+                    <p class="mt-1 text-xs text-graysoft">{{ __('Bu oy tushumi (so’m)') }}</p>
+                </div>
+                <div class="rounded-xl bg-cream p-5 text-center">
+                    <p class="text-2xl font-extrabold text-emerald-deep">{{ number_format($paymentsSummary['this_month_count']) }}</p>
+                    <p class="mt-1 text-xs text-graysoft">{{ __('Bu oy to’lovlar') }}</p>
+                </div>
+                <div class="rounded-xl bg-cream p-5 text-center">
+                    <p class="text-2xl font-extrabold text-emerald-deep">{{ number_format($paymentsSummary['active_subscriptions']) }}</p>
+                    <p class="mt-1 text-xs text-graysoft">{{ __('Faol obunalar') }}</p>
+                </div>
+            </div>
+        </section>
+
+        {{-- Oxirgi tranzaksiyalar + oylik dinamika --}}
+        <section class="glass-panel mt-4 p-6" aria-labelledby="payments-list">
+            <h2 id="payments-list" class="font-bold text-forest">{{ __('Oxirgi tranzaksiyalar') }}</h2>
+            <div class="mt-4 overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead><tr class="text-left text-xs uppercase text-graysoft"><th class="py-2">{{ __('Foydalanuvchi') }}</th><th>{{ __('Reja') }}</th><th>{{ __('Summa') }}</th><th>{{ __('Provayder') }}</th><th>{{ __('Holat') }}</th><th>{{ __('Sana') }}</th></tr></thead>
+                    <tbody>
+                        @forelse ($paymentsList as $payment)
+                            <tr class="border-t border-gray-100">
+                                <td class="py-3 font-medium">{{ $payment->user?->name }}</td>
+                                <td>{{ $payment->plan?->name ?? '—' }}</td>
+                                <td>{{ number_format($payment->amount_tiyin / 100) }} {{ __('so’m') }}</td>
+                                <td class="uppercase">{{ $payment->provider }}</td>
+                                <td><span class="rounded-full px-2 py-0.5 text-xs {{ $payment->status === 'paid' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800' }}">{{ $payment->status }}</span></td>
+                                <td class="text-graysoft">{{ $payment->created_at->format('d.m.Y H:i') }}</td>
+                            </tr>
+                        @empty
+                            <tr><td colspan="6" class="py-6 text-center text-graysoft">{{ __('Tranzaksiya yo‘q') }}</td></tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        {{-- Oylik o'quv to'lovlari (fee_items) --}}
+        <section class="glass-panel mt-4 p-6" aria-labelledby="fees-heading">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+                <h2 id="fees-heading" class="font-bold text-forest">{{ __('Oylik o‘quv to‘lovlari') }}</h2>
+                <form method="POST" action="{{ route('administration.payments.generate') }}">
+                    @csrf
+                    <button type="submit" class="rounded-xl bg-emerald-deep px-5 py-2.5 text-sm font-bold text-cream transition hover:bg-forest">
+                        ⟳ {{ __('Joriy oy invoyslarini yaratish') }}
+                    </button>
+                </form>
+            </div>
+
+            <div class="mt-4 grid gap-3 sm:grid-cols-4">
+                <div class="rounded-xl bg-cream p-4 text-center"><p class="text-xl font-extrabold text-forest">{{ number_format($feesStats['paid_som']) }}</p><p class="text-[11px] text-graysoft">{{ __('To‘langan (so‘m)') }}</p></div>
+                <div class="rounded-xl bg-cream p-4 text-center"><p class="text-xl font-extrabold text-emerald-deep">{{ number_format($feesStats['pending_som']) }}</p><p class="text-[11px] text-graysoft">{{ __('To‘lanmagan (so‘m)') }}</p></div>
+                <div class="rounded-xl bg-cream p-4 text-center"><p class="text-xl font-extrabold text-amber-600">{{ $feesStats['pending_count'] }}</p><p class="text-[11px] text-graysoft">{{ __('Kutayotgan yozuvlar') }}</p></div>
+                <div class="rounded-xl bg-cream p-4 text-center"><p class="text-xl font-extrabold text-red-600">{{ $feesStats['overdue_count'] }}</p><p class="text-[11px] text-graysoft">{{ __('Muddati o‘tgan') }}</p></div>
+            </div>
+
+            <div class="mt-5 overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead><tr class="text-left text-xs uppercase text-graysoft"><th class="py-2">{{ __('O‘quvchi') }}</th><th>{{ __('Guruh') }}</th><th>{{ __('Oy') }}</th><th>{{ __('Summa') }}</th><th>{{ __('To‘langan') }}</th><th>{{ __('Muddat') }}</th><th>{{ __('Amallar') }}</th></tr></thead>
+                    <tbody>
+                        @forelse ($fees as $fee)
+                            @php $due = $fee->amount_tiyin - $fee->paid_amount_tiyin; @endphp
+                            <tr class="border-t border-gray-100">
+                                <td class="py-3"><strong>{{ $fee->student?->name }}</strong><br><small class="text-graysoft">{{ $fee->student?->email }}</small></td>
+                                <td>{{ $fee->group?->name ?? $fee->course?->name }}</td>
+                                <td>{{ str_pad($fee->month, 2, '0', STR_PAD_LEFT) }}.{{ $fee->year }}</td>
+                                <td>{{ number_format($fee->amount_tiyin / 100) }}</td>
+                                <td>
+                                    <span class="rounded-full px-2 py-0.5 text-xs font-bold
+                                        {{ $fee->status === 'paid' ? 'bg-emerald-100 text-emerald-800' : ($fee->status === 'partial' ? 'bg-amber-100 text-amber-800' : 'bg-gray-100 text-gray-600') }}">
+                                        {{ match ($fee->status) { 'paid' => __('To‘langan'), 'partial' => __('Qismiy'), 'cancelled' => __('Bekor'), default => __('Kutmoqda') } }}
+                                    </span>
+                                    @if ($due > 0)<small class="block text-[10px] text-graysoft">{{ __('qoldiq') }}: {{ number_format($due / 100) }}</small>@endif
+                                </td>
+                                <td class="text-graysoft">{{ $fee->due_date?->format('d.m') ?? '—' }}@if ($fee->due_date && $fee->due_date->isPast() && $due > 0) <span class="text-red-600 font-bold" title="{{ __('Muddati o‘tgan') }}">⚠</span>@endif</td>
+                                <td>
+                                    @if ($due > 0)
+                                        <form method="POST" action="{{ route('administration.payments.receive', $fee) }}" class="flex items-center gap-1">
+                                            @csrf
+                                            <input type="number" name="amount_som" min="1" max="{{ (int) ($due / 100) }}" value="{{ (int) ($due / 100) }}" aria-label="{{ __('To‘lov summasi') }}" class="!min-h-0 w-20 rounded-lg border border-gray-200 px-2 py-1.5 text-xs">
+                                            <button type="submit" class="rounded-lg bg-forest px-2.5 py-1.5 text-xs font-bold text-white" title="{{ __('To‘lov qabul qilish') }}">✓</button>
+                                        </form>
+                                        <form method="POST" action="{{ route('administration.payments.remind', $fee) }}" class="mt-1">
+                                            @csrf
+                                            <button type="submit" class="text-[10px] text-graysoft hover:text-forest hover:underline">🔔 {{ __('Eslatma yuborish') }}</button>
+                                        </form>
+                                    @else
+                                        <span class="text-emerald-600" title="{{ __('To‘liq to‘langan') }}">✓</span>
+                                    @endif
+                                </td>
+                            </tr>
+                        @empty
+                            <tr><td colspan="7" class="py-6 text-center text-graysoft">{{ __('To‘lov yozuvi yo‘q. Yuqoridagi tugma bilan joriy oy invoyslarini yarating.') }}</td></tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+            {{ $fees->links() }}
+        </section>
     @else
         <section class="glass-panel max-w-3xl p-6"><h2 class="font-bold text-forest">{{ __('Platforma ma’lumotlari') }}</h2><dl class="mt-5 divide-y divide-gray-200 text-sm"><div class="flex flex-wrap justify-between gap-3 py-4"><dt class="text-graysoft">{{ __('Platforma nomi') }}</dt><dd>{{ config('app.name') }}</dd></div><div class="flex justify-between gap-3 py-4"><dt class="text-graysoft">{{ __('Vaqt mintaqasi') }}</dt><dd>{{ config('app.display_timezone', 'Asia/Tashkent') }}</dd></div><div class="flex justify-between gap-3 py-4"><dt class="text-graysoft">{{ __('Til') }}</dt><dd>{{ app()->getLocale() }}</dd></div></dl><p class="mt-5 text-xs text-graysoft">{{ __('Xizmat kalitlari xavfsizlik sababli interfeysda ko‘rsatilmaydi.') }}</p></section>
     @endif

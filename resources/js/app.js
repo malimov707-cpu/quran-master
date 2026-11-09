@@ -55,6 +55,7 @@ document.querySelectorAll('form').forEach(form => form.addEventListener('submit'
 window.addEventListener('pageshow', () => document.querySelectorAll('button[aria-busy]').forEach(button => { button.disabled = false; button.removeAttribute('aria-busy'); }));
 function initializeReader() {
 const reader = document.querySelector('[data-reader]');
+initReadingSync(reader);
 if (reader) {
     let size = Number(storage.get('quran-reader-size')) || 30;
     const apply = () => reader.style.setProperty('--reader-size', `${size}px`);
@@ -142,6 +143,7 @@ const reviewAction = document.querySelector('#review-action');
 reviewAction?.addEventListener('change', () => document.querySelector('#review-score').required = reviewAction.value === 'approve');
 
 import './quran-audio';
+import { initReadingSync } from './reading-sync';
 
 // Alpine.js — AI voice chat sahifasi uchun
 import Alpine from 'alpinejs';

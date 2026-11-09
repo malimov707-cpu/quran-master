@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Models\AiUsageLog;
 use App\Models\Submission;
 use App\Models\User;
 use App\Services\AI\Contracts\AIExplanationProvider;
@@ -39,11 +40,25 @@ class AiController extends Controller
             return response()->json(['status' => 'unavailable', 'message' => 'OpenRouter API kaliti sozlanmagan.'], 503);
         }
 
-        if (! app(RoleAwareAiAssistant::class)->hasAccess($user)) {
-            return response()->json([
-                'status' => 'premium_required',
-                'message' => 'Bu AI yordamchisi premium yoki yuqori ball darajasiga ega o‘quvchilar uchun ochilgan.',
-            ], 402);
+        // Freemium: hamma foydalanuvchi kunda AI_FREE_DAILY_LIMIT savol bepul.
+        // Premium (yuqori ball) foydalanuvchilarda cheklov yo'q.
+        $assistant = app(RoleAwareAiAssistant::class);
+        $isPremium = $assistant->hasAccess($user);
+
+        if (! $isPremium) {
+            $usedToday = AiUsageLog::where('user_id', $user->id)
+                ->where('operation', 'chat')
+                ->where('created_at', '>=', now()->startOfDay())
+                ->count();
+
+            if ($usedToday >= config('ai.free_daily_limit', 20)) {
+                return response()->json([
+                    'status' => 'daily_limit_reached',
+                    'message' => 'Kunlik bepul AI savollar limiti ('.config('ai.free_daily_limit', 20).') tugadi. Ertaga davom eting yoki balni oshirib premium oling.',
+                    'used_today' => $usedToday,
+                    'limit' => (int) config('ai.free_daily_limit', 20),
+                ], 429);
+            }
         }
 
         $answer = $provider->explain($data['question'], app(RoleAwareAiAssistant::class)->contexts($user));
@@ -52,7 +67,25 @@ class AiController extends Controller
             return response()->json(['status' => 'unavailable', 'message' => 'AI provider javob qaytarmadi.'], 502);
         }
 
-        return response()->json(['status' => 'completed', 'answer' => $answer]);
+        AiUsageLog::create([
+            'user_id' => $user->id,
+            'provider' => $provider->name(),
+            'model' => method_exists($provider, 'model') ? $provider->model() : null,
+            'operation' => 'chat',
+            'success' => true,
+        ]);
+
+        $usedToday = AiUsageLog::where('user_id', $user->id)
+            ->where('operation', 'chat')
+            ->where('created_at', '>=', now()->startOfDay())
+            ->count();
+
+        return response()->json([
+            'status' => 'completed',
+            'answer' => $answer,
+            'used_today' => $usedToday,
+            'limit' => $isPremium ? null : (int) config('ai.free_daily_limit', 20),
+        ]);
     }
 
     public function setPremium(Request $request, User $user): JsonResponse

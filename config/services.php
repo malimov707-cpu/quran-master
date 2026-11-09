@@ -36,6 +36,17 @@ return [
     ],
 
     // AI provayderlari — kalitlar faqat backendda
+    'payme' => [
+        'merchant_id' => env('PAYME_MERCHANT_ID'),
+        'key' => env('PAYME_KEY'),
+    ],
+
+    'click' => [
+        'merchant_id' => env('CLICK_MERCHANT_ID'),
+        'service_id' => env('CLICK_SERVICE_ID'),
+        'secret_key' => env('CLICK_SECRET_KEY'),
+    ],
+
     'openai' => [
         'key' => env('OPENAI_API_KEY'),
         'whisper_model' => env('WHISPER_MODEL', 'whisper-1'),
