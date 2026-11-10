@@ -3,7 +3,10 @@
 @section('title', __('Qur\'on'))
 
 @section('content')
-    <h1 class="text-2xl font-bold text-emerald-deep">{{ __('Qur\'on — Suralar') }}</h1>
+    <div class="flex items-center gap-3">
+        <x-icon3d variant="navy" :size="44" class="icon3d-float"><x-art3d name="moon" class="w-8 h-8"/></x-icon3d>
+        <h1 class="text-2xl font-bold text-emerald-deep">{{ __('Qur\'on — Suralar') }}</h1>
+    </div>
 
     <p class="mt-2 text-sm text-graysoft">{{ __('Ishonchli matn. Qulay o‘qish. Har kuni yangi qadam.') }}</p>
     <form method="GET" class="mt-5 flex gap-3"><label class="min-w-0 flex-1"><span class="sr-only">{{ __('Sura nomi yoki raqami') }}</span><input name="q" value="{{ request('q') }}" placeholder="{{ __('Sura nomi yoki raqami') }}" class="w-full"></label><button type="submit" class="rounded-xl bg-forest px-5 text-white">{{ __('Qidirish') }}</button></form>

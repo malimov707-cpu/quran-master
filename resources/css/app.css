@@ -244,9 +244,13 @@ body.has-quran-audio .app-content { padding-bottom: 150px; }
 @media (max-width: 767px) { .hero-banner { padding: 22px 18px; border-radius: 20px; } .hero-title { font-size: 24px; } .kpi-grid { gap: 10px; } .kpi-card { padding: 14px; gap: 10px; } .kpi-icon { width: 40px; height: 40px; font-size: 17px; } .kpi-value { font-size: 18px; } .ai-mentor-card::after { font-size: 64px; } }
 
 /* ================= 3D ICON SYSTEM ================= */
-.icon3d { position: relative; display: inline-flex; align-items: center; justify-content: center; border-radius: 18px; transform-style: preserve-3d; transition: transform .25s ease, box-shadow .25s ease; }
-.icon3d:hover { transform: translateY(-2px) rotateX(4deg); }
-.icon3d > svg, .icon3d > span { position: relative; z-index: 1; filter: drop-shadow(0 2px 1px rgba(0,0,0,.18)); }
+.icon3d { position: relative; display: inline-flex; align-items: center; justify-content: center; border-radius: 18px; transform-style: preserve-3d; animation: icon3d-motion 3.2s ease-in-out infinite; }
+.icon3d:hover { animation-duration: 1.2s; }
+.icon3d > svg, .icon3d > span { position: relative; z-index: 1; transform: translateZ(8px); filter: drop-shadow(0 2px 1px rgba(0,0,0,.22)); }
+.icon3d::before { content: ""; position: absolute; z-index: 2; top: 4px; left: 10%; width: 62%; height: 18%; border-radius: 999px; background: linear-gradient(90deg, transparent, rgba(255,255,255,.62), transparent); pointer-events: none; }
+.icon3d::after { content: ""; position: absolute; z-index: 0; inset: 45% 0 0; border-radius: inherit; background: linear-gradient(180deg, transparent, rgba(0,0,0,.18)); pointer-events: none; }
+@keyframes icon3d-motion { 0%,100% { transform: perspective(650px) translateY(0) rotateX(-7deg) rotateY(7deg) rotateZ(-1deg) scale(1); } 50% { transform: perspective(650px) translateY(-5px) rotateX(8deg) rotateY(-8deg) rotateZ(1deg) scale(1.05); } }
+@keyframes icon3d-float { 0%,100% { transform: perspective(650px) translateY(0) rotateX(-8deg) rotateY(8deg) rotateZ(-1deg) scale(1); } 50% { transform: perspective(650px) translateY(-9px) rotateX(9deg) rotateY(-9deg) rotateZ(1deg) scale(1.06); } }
 
 /* Variant: emerald */
 .icon3d-emerald { background: linear-gradient(145deg, #12b981 0%, #0b6246 55%, #06442f 100%); box-shadow: inset 0 2px 3px rgba(255,255,255,.35), inset 0 -4px 8px rgba(0,0,0,.35), 0 8px 14px -4px rgba(11,98,70,.5), 0 3px 5px rgba(0,0,0,.18); }
@@ -257,10 +261,8 @@ body.has-quran-audio .app-content { padding-bottom: 150px; }
 /* Variant: ivory / soft */
 .icon3d-ivory { background: linear-gradient(145deg, #ffffff 0%, #efe7d6 60%, #ddcfb2 100%); box-shadow: inset 0 2px 3px rgba(255,255,255,.9), inset 0 -4px 8px rgba(0,0,0,.08), 0 8px 14px -4px rgba(120,100,60,.25); color: #0b6246; }
 
-/* Floating keyframes for hero icons */
-@keyframes icon3d-float { 0%,100% { transform: translateY(0) } 50% { transform: translateY(-5px) } }
 .icon3d-float { animation: icon3d-float 4.5s ease-in-out infinite; }
-@media (prefers-reduced-motion: reduce) { .icon3d-float { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .icon3d, .icon3d-float { animation: none; } }
 
 /* Apply to existing slots */
 .kpi-icon.icon3d, .metric-icon.icon3d, .hero-goal-icon.icon3d { border-radius: 16px; }

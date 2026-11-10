@@ -3,7 +3,10 @@
 @section('title', __('To‘lovlar'))
 
 @section('content')
-    <h1 class="text-2xl font-bold text-emerald-deep">{{ __('To‘lovlar') }}</h1>
+    <div class="flex items-center gap-3">
+        <x-icon3d variant="gold" :size="44" class="icon3d-float"><x-art3d name="trophy" class="w-8 h-8"/></x-icon3d>
+        <h1 class="text-2xl font-bold text-emerald-deep">{{ __('To‘lovlar') }}</h1>
+    </div>
     <p class="mt-1 text-sm text-graysoft">
         {{ $isParent ? __('Farzandingizning oylik to‘lovlari va AI obunasi bitta joyda.') : __('Oylik to‘lovlaringiz va AI obunangiz bitta joyda.') }}
     </p>

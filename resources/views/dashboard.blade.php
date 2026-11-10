@@ -93,7 +93,7 @@
                             $poly = $pts->map(fn ($pt, $i) => (30 + $i * (270 / $n)).','.($pt['pct'] === null ? null : 108 - $pt['pct'] / 100 * 96))->filter(fn ($c) => ! str_contains($c, ',null'))->implode(' ');
                         @endphp
                         @if ($poly)
-                            <polygon points="30,108 {{ $poly }} {{ 30 + 270 }},108" fill="#0b624622" stroke="none"/>
+                            @if (substr_count($poly, ',') >= 2)<polygon points="30,108 {{ $poly }} {{ 30 + 270 }},108" fill="#0b624622" stroke="none"/>@endif
                             <polyline points="{{ $poly }}" fill="none" stroke="#0b6246" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
                             @foreach ($pts as $i => $pt)
                                 @if ($pt['pct'] !== null)

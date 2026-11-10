@@ -5,7 +5,10 @@
 @section('content')
     <div class="mb-6 flex flex-wrap items-center justify-between gap-4">
         <div>
-            <h1 class="text-2xl font-bold text-emerald-deep">{{ __('Farzandlarim') }}</h1>
+            <div class="flex items-center gap-3">
+        <x-icon3d variant="emerald" :size="44" class="icon3d-float"><x-art3d name="users" class="w-8 h-8"/></x-icon3d>
+        <h1 class="text-2xl font-bold text-emerald-deep">{{ __('Farzandlarim') }}</h1>
+    </div>
             <p class="mt-1 text-sm text-graysoft">{{ __('Farzandingizning baholari, davomati va haftalik natijalari.') }}</p>
         </div>
         @if ($children->isNotEmpty())

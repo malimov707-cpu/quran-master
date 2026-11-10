@@ -4,7 +4,10 @@
 
 @section('content')
     <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+        <x-icon3d variant="gold" :size="44" class="icon3d-float"><x-art3d name="mushaf" class="w-8 h-8"/></x-icon3d>
         <h1 class="text-2xl font-bold text-emerald-deep">{{ __('Kurslar') }}</h1>
+    </div>
     </div>
 
     @if (session('status'))

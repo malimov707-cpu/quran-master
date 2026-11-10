@@ -3,7 +3,10 @@
 @section('title', __('Guruhlar'))
 
 @section('content')
-    <h1 class="text-2xl font-bold text-emerald-deep">{{ __('Guruhlar') }}</h1>
+    <div class="flex items-center gap-3">
+        <x-icon3d variant="emerald" :size="44" class="icon3d-float"><x-art3d name="users" class="w-8 h-8"/></x-icon3d>
+        <h1 class="text-2xl font-bold text-emerald-deep">{{ __('Guruhlar') }}</h1>
+    </div>
 
     @if (session('status'))
         <div class="mt-4 rounded-lg bg-emerald-50 px-4 py-3 text-sm text-emerald-800">{{ session('status') }}</div>

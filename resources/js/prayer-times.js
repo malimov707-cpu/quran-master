@@ -32,7 +32,8 @@ for (const widget of document.querySelectorAll('[data-prayer-widget]')) {
         try {
             const url = new URL(widget.dataset.endpoint, location.href);
             url.searchParams.set('city', city.value);
-            const response = await fetch(url, { headers: { Accept: 'application/json' }, signal: current.signal });
+            const webToken = document.cookie.split('; ').find((entry) => entry.startsWith('web_token='))?.split('=')[1];
+            const response = await fetch(url, { headers: { Accept: 'application/json', ...(webToken ? { Authorization: `Bearer ${webToken}` } : {}), 'X-Requested-With': 'XMLHttpRequest' }, credentials: 'same-origin', signal: current.signal });
             if (!response.ok) throw new Error('request');
             const result = await response.json();
             if (request !== current) return;

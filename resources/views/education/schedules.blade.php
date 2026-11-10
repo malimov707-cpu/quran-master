@@ -1,7 +1,10 @@
 @extends('layouts.app')
 @section('title', __('Jadval va davomat'))
 @section('content')
-    <h1 class="text-2xl font-bold text-emerald-deep">{{ __('Jadval va davomat') }}</h1>
+    <div class="flex items-center gap-3">
+        <x-icon3d variant="navy" :size="44" class="icon3d-float"><x-art3d name="clock" class="w-8 h-8"/></x-icon-3d>
+        <h1 class="text-2xl font-bold text-emerald-deep">{{ __('Jadval va davomat') }}</h1>
+    </div>
     <p class="mt-2 text-sm text-graysoft">{{ __('Dars vaqtlarini Toshkent vaqti bilan belgilang va guruh davomatini kiriting.') }}</p>
     @if ($canCreate)
         <details class="mt-6 rounded-2xl bg-ivory p-6 ring-1 ring-black/5" @if ($errors->any()) open @endif>

@@ -1,7 +1,7 @@
 @extends('layouts.app')
 @section('title', __($pageTitle))
 @section('content')
-    <div class="mb-6"><p class="welcome-eyebrow">{{ __('Boshqaruv markazi') }}</p><h1 class="text-3xl font-bold text-emerald-deep">{{ __($pageTitle) }}</h1><p class="mt-2 text-sm text-graysoft">{{ __('Markaz ma’lumotlari va xizmatlar holati') }}</p></div>
+    <div class="mb-6 flex items-center gap-4"><x-icon3d variant="navy" :size="48" class="icon3d-float"><x-art3d name="users" class="w-9 h-9"/></x-icon-3d><div><p class="welcome-eyebrow">{{ __('Boshqaruv markazi') }}</p><h1 class="text-3xl font-bold text-emerald-deep">{{ __($pageTitle) }}</h1><p class="mt-2 text-sm text-graysoft">{{ __('Markaz ma’lumotlari va xizmatlar holati') }}</p></div></div>
     @if ($section === 'users')
         @if (auth()->user()->hasRole('SUPER_ADMIN'))<a href="{{ route('administration.users.create') }}" class="mb-5 inline-block rounded-xl bg-forest px-5 py-3 font-semibold text-white">{{ __('Foydalanuvchi yaratish') }} +</a>@endif
         <form method="GET" class="glass-panel mb-5 flex flex-wrap gap-3 p-4"><label class="min-w-0 flex-1"><span class="sr-only">{{ __('Ism yoki email') }}</span><input name="q" value="{{ $filters['q'] ?? '' }}" placeholder="{{ __('Ism yoki email') }}" class="w-full"></label><select name="role" aria-label="{{ __('Rol') }}"><option value="">{{ __('Barcha rollar') }}</option>@foreach ($roles as $role)<option value="{{ $role->name }}" @selected(($filters['role'] ?? '') === $role->name)>{{ $role->label }}</option>@endforeach</select><button type="submit" class="rounded-xl bg-forest px-5 text-white">{{ __('Qidirish') }}</button><a href="{{ route('administration', 'users') }}" class="px-3 py-3 text-sm text-forest">{{ __('Tozalash') }}</a></form>

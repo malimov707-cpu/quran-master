@@ -1,7 +1,10 @@
 @extends('layouts.app')
 @section('title', __('Uy vazifalarim'))
 @section('content')
-    <h1 class="text-2xl font-bold text-emerald-deep">{{ __('Uy vazifalarim') }}</h1>
+    <div class="flex items-center gap-3">
+        <x-icon3d variant="emerald" :size="44" class="icon3d-float"><x-art3d name="mushaf" class="w-8 h-8"/></x-icon3d>
+        <h1 class="text-2xl font-bold text-emerald-deep">{{ __('Uy vazifalarim') }}</h1>
+    </div>
     <p class="mt-2 text-sm text-graysoft">{{ __('Topshiriqni oching, audio yozuvingizni yuboring va mentor natijasini kuzating.') }}</p>
     <div class="mt-6 grid gap-4 md:grid-cols-2">
         @forelse ($assignments as $assignment)

@@ -3,7 +3,10 @@
 @section('title', __('Tekshiruv'))
 
 @section('content')
-    <h1 class="text-2xl font-bold text-emerald-deep">{{ __('Kutayotgan topshirishlar') }}</h1>
+    <div class="flex items-center gap-3">
+        <x-icon3d variant="emerald" :size="44" class="icon3d-float"><x-art3d name="mic" class="w-8 h-8"/></x-icon3d>
+        <h1 class="text-2xl font-bold text-emerald-deep">{{ __('Kutayotgan topshirishlar') }}</h1>
+    </div>
 
     <div class="mt-6 overflow-x-auto rounded-2xl bg-ivory shadow-sm ring-1 ring-black/5">
         <table class="w-full text-sm">
